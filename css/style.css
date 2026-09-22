@@ -1,16 +1,37 @@
 :root {
-    --bg-main: #0f0f12;
-    --bg-card: #18181f;
-    --bg-element: #23232e;
-    --bg-hover: #2e2e3d;
-    --wine-primary: #800020;
-    --wine-accent: #b01235;
+    /* Modo Oscuro (Predeterminado - Cava Enológica) */
+    --bg-main: #0c0c10;
+    --bg-card: #16161f;
+    --bg-element: #21212e;
+    --bg-hover: #2c2c3d;
+    --border-color: #2d2d3f;
+    --wine-primary: #6b0018;
+    --wine-accent: #a81335;
     --gold: #d4af37;
-    --text-main: #f0f0f5;
-    --text-muted: #a0a0b0;
-    --success: #28a745;
-    --danger: #dc3545;
-    --border-radius: 12px;
+    --text-main: #f1f1f6;
+    --text-muted: #9a9ab0;
+    --shadow-main: 0 12px 32px rgba(0, 0, 0, 0.6);
+    --card-glow: 0 0 20px rgba(168, 19, 53, 0.15);
+}
+[data-theme="light"] {
+    /* Modo Claro (Limpio e Industrial) */
+    --bg-main: #f2f2f7;
+    --bg-card: #ffffff;
+    --bg-element: #f7f7fa;
+    --bg-hover: #eaeaf2;
+    --border-color: #dcdcfa;
+    --wine-primary: #7a001e;
+    --wine-accent: #b8143a;
+    --gold: #b58d1d;
+    --text-main: #1c1c24;
+    --text-muted: #5e5e72;
+    --shadow-main: 0 12px 32px rgba(0, 0, 0, 0.08);
+    --card-glow: 0 0 20px rgba(184, 20, 58, 0.08);
+}
+
+/* Transición suave al cambiar de tema */
+body, .game-card, .stat-card, .option-btn, .modal-content, .feedback-box {
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
 
 * {
@@ -379,4 +400,81 @@ body {
     border: 1px solid var(--gold);
     border-radius: 20px;
     font-weight: 600;
+}
+/* ==========================================
+   ANIMACIONES Y MICROINTERACCIONES
+   ========================================== */
+
+/* Entrada suave de elementos */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Escala al activar contenedores */
+@keyframes popIn {
+    0% { transform: scale(0.96); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.game-card {
+    box-shadow: var(--shadow-main), var(--card-glow);
+    animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.step-block.active {
+    animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Estilo y animación del botón de Tema */
+.theme-switch-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.theme-btn {
+    background: var(--bg-element);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
+}
+
+.theme-btn:hover {
+    transform: rotate(20deg) scale(1.1);
+    border-color: var(--gold);
+}
+
+/* Interacción de botones de opciones */
+.option-btn {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                background-color 0.25s ease, 
+                border-color 0.25s ease, 
+                box-shadow 0.25s ease;
+}
+
+.option-btn:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    border-color: var(--wine-accent);
+}
+
+.option-btn:active {
+    transform: translateY(0) scale(0.98);
 }

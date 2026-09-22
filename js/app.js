@@ -219,6 +219,34 @@ restartBtn.addEventListener('click', () => {
 // EVENTOS DEL MODAL DE LA RUEDA AROMASTER
 // ==========================================
 function configurarEventosGlobales() {
+    // ==========================================
+// CONTROL DE MODO OSCURO / MODO CLARO
+// ==========================================
+const themeToggleBtn = document.getElementById('theme-toggle');
+const themeGuardado = localStorage.getItem('theme-preference') || 'dark';
+
+// Aplicar el tema recordado
+if (themeGuardado === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    if (themeToggleBtn) themeToggleBtn.textContent = '☀️';
+}
+
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+        const esClaro = document.documentElement.getAttribute('data-theme') === 'light';
+        
+        if (esClaro) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme-preference', 'dark');
+            themeToggleBtn.textContent = '🌙';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme-preference', 'light');
+            themeToggleBtn.textContent = '☀️';
+        }
+    });
+}
+
     openWheelBtn.addEventListener('click', () => wheelModal.classList.remove('hidden'));
     closeWheelBtn.addEventListener('click', () => wheelModal.classList.add('hidden'));
 
