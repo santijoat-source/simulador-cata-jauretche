@@ -1,0 +1,382 @@
+:root {
+    --bg-main: #0f0f12;
+    --bg-card: #18181f;
+    --bg-element: #23232e;
+    --bg-hover: #2e2e3d;
+    --wine-primary: #800020;
+    --wine-accent: #b01235;
+    --gold: #d4af37;
+    --text-main: #f0f0f5;
+    --text-muted: #a0a0b0;
+    --success: #28a745;
+    --danger: #dc3545;
+    --border-radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 720px;
+}
+
+/* Header */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.badge {
+    background: var(--wine-primary);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.main-header h1 {
+    font-size: 1.4rem;
+    margin-top: 4px;
+}
+
+.stats-bar {
+    display: flex;
+    gap: 12px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border: 1px solid #2d2d3a;
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+/* Card Principal */
+.game-card {
+    background: var(--bg-card);
+    border: 1px solid #2d2d3a;
+    border-radius: var(--border-radius);
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.sample-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.sample-badge {
+    background: var(--wine-accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.sample-perception {
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.sample-description {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #2d2d3a;
+    margin: 20px 0;
+}
+
+/* Deducción */
+.step-block {
+    margin-bottom: 20px;
+}
+
+.step-block.hidden {
+    display: none;
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.step-number {
+    background: var(--bg-element);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.step-hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.option-btn {
+    background: var(--bg-element);
+    border: 1px solid #333344;
+    color: var(--text-main);
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--wine-accent);
+}
+
+.option-btn.selected-correct {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+}
+
+.option-btn.selected-incorrect {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+}
+
+/* Feedback Modal */
+.feedback-box {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 8px;
+    background: var(--bg-element);
+    border-left: 4px solid var(--gold);
+}
+
+.feedback-box.hidden {
+    display: none;
+}
+
+.feedback-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.feedback-body {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.primary-btn {
+    background: var(--wine-accent);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.primary-btn:hover {
+    background: var(--wine-primary);
+}
+/* Sub-badge del colegio */
+.sub-badge {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--gold);
+    margin-top: 2px;
+}
+
+.header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+/* Botón de Rueda */
+.wheel-btn {
+    background: var(--bg-element);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.wheel-btn:hover {
+    background: var(--gold);
+    color: #000;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-overlay.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--bg-card);
+    border: 1px solid #333344;
+    border-radius: var(--border-radius);
+    max-width: 650px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #2d2d3a;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 16px;
+    overflow-y: auto;
+    text-align: center;
+}
+
+.wheel-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+/* Pantalla de Resultados Finales */
+.end-screen {
+    text-align: center;
+    padding: 20px 10px;
+}
+
+.end-header h2 {
+    color: var(--gold);
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+}
+
+.summary-card {
+    background: var(--bg-element);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
+
+.score-number {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+}
+
+.score-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.rank-badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 6px 16px;
+    background: rgba(212, 175, 55, 0.15);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    font-weight: 600;
+}
