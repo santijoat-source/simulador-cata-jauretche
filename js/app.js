@@ -7,6 +7,7 @@ let casoActualIndex = 0;
 // Elementos del Encabezado y Estadísticas
 const scoreDisplay = document.getElementById('score-display');
 const caseCounter = document.getElementById('case-counter');
+const themeToggleBtn = document.getElementById('theme-toggle');
 
 // Elementos de la Muestra
 const sampleBadge = document.getElementById('sample-badge');
@@ -44,9 +45,36 @@ const wheelModal = document.getElementById('wheel-modal');
 // INICIALIZACIÓN
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    inicializarTema();
     cargarCasoActual();
     configurarEventosGlobales();
 });
+
+// ==========================================
+// CONTROL DE MODO OSCURO / MODO CLARO
+// ==========================================
+function inicializarTema() {
+    const themeGuardado = localStorage.getItem('theme-preference') || 'dark';
+    if (themeGuardado === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        if (themeToggleBtn) themeToggleBtn.textContent = '☀️';
+    }
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const esClaro = document.documentElement.getAttribute('data-theme') === 'light';
+            if (esClaro) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme-preference', 'dark');
+                themeToggleBtn.textContent = '🌙';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme-preference', 'light');
+                themeToggleBtn.textContent = '☀️';
+            }
+        });
+    }
+}
 
 // ==========================================
 // CARGAR Y MOSTRAR CASO
@@ -54,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function cargarCasoActual() {
     const caso = CASOS_ENOLOGIA[casoActualIndex];
 
-    // Resetear visibilidad de contenedores y modales
+    // Resetear visibilidad de contenedores
     feedbackModal.classList.add('hidden');
     step1Container.classList.remove('hidden');
     step1Container.classList.add('active');
@@ -68,7 +96,7 @@ function cargarCasoActual() {
     sampleDescription.textContent = caso.descripcion;
     caseCounter.textContent = `${casoActualIndex + 1} / ${CASOS_ENOLOGIA.length}`;
 
-    // Cargar las opciones del Paso 1
+    // Cargar opciones del Paso 1
     renderPaso1(caso);
 }
 
@@ -166,12 +194,11 @@ function mostrarFeedback(esCorrecto, mensaje) {
 }
 
 // ==========================================
-// EVENTO CLAVE: "SIGUIENTE MUESTRA" Y FIN DE JUEGO
+// EVENTO: SIGUIENTE MUESTRA Y FIN DE JUEGO
 // ==========================================
 nextBtn.addEventListener('click', () => {
-    casoActualIndex++; // Avanzar el contador de la muestra
+    casoActualIndex++;
     
-    // Si quedan muestras, carga la siguiente; si no, muestra la pantalla final
     if (casoActualIndex < CASOS_ENOLOGIA.length) {
         cargarCasoActual();
     } else {
@@ -183,12 +210,10 @@ nextBtn.addEventListener('click', () => {
 // PANTALLA FINAL Y REINICIO
 // ==========================================
 function mostrarPantallaFinal() {
-    // Ocultar zonas de juego
     document.querySelector('.sample-info').classList.add('hidden');
     document.querySelector('.deduction-panel').classList.add('hidden');
     feedbackModal.classList.add('hidden');
     
-    // Actualizar puntaje y nivel alcanzado
     finalScoreEl.textContent = score;
     
     if (score >= 130) {
@@ -201,7 +226,6 @@ function mostrarPantallaFinal() {
         finalRankEl.textContent = "🍷 Estudiante de Enología";
     }
     
-    // Mostrar pantalla de cierre
     endScreen.classList.remove('hidden');
 }
 
@@ -216,48 +240,22 @@ restartBtn.addEventListener('click', () => {
 });
 
 // ==========================================
-// EVENTOS DEL MODAL DE LA RUEDA AROMASTER
+// EVENTOS DE LA RUEDA AROMASTER
 // ==========================================
 function configurarEventosGlobales() {
-    // ==========================================
-// CONTROL DE MODO OSCURO / MODO CLARO
-// ==========================================
-const themeToggleBtn = document.getElementById('theme-toggle');
-const themeGuardado = localStorage.getItem('theme-preference') || 'dark';
+    if (openWheelBtn) openWheelBtn.addEventListener('click', () => wheelModal.classList.remove('hidden'));
+    if (closeWheelBtn) closeWheelBtn.addEventListener('click', () => wheelModal.classList.add('hidden'));
 
-// Aplicar el tema recordado
-if (themeGuardado === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light');
-    if (themeToggleBtn) themeToggleBtn.textContent = '☀️';
+    if (wheelModal) {
+        wheelModal.addEventListener('click', (e) => {
+            if (e.target === wheelModal) {
+                wheelModal.classList.add('hidden');
+            }
+        });
+    }
 }
 
-if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-        const esClaro = document.documentElement.getAttribute('data-theme') === 'light';
-        
-        if (esClaro) {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('theme-preference', 'dark');
-            themeToggleBtn.textContent = '🌙';
-        } else {
-            document.documentElement.setAttribute('data-theme', 'light');
-            localStorage.setItem('theme-preference', 'light');
-            themeToggleBtn.textContent = '☀️';
-        }
-    });
-}
-
-    openWheelBtn.addEventListener('click', () => wheelModal.classList.remove('hidden'));
-    closeWheelBtn.addEventListener('click', () => wheelModal.classList.add('hidden'));
-
-    wheelModal.addEventListener('click', (e) => {
-        if (e.target === wheelModal) {
-            wheelModal.classList.add('hidden');
-        }
-    });
-}
-
-// Función auxiliar para mezclar las opciones aleatoriamente
+// Función auxiliar para mezclar opciones
 function mezclarArreglo(arreglo) {
     return [...arreglo].sort(() => Math.random() - 0.5);
 }

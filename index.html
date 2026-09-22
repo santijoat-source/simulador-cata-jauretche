@@ -3,21 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Cata - Escuela 4-038 Arturo Jauretche</title>
+    <title>Simulador de Cata Enológica</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <div class="app-container">
-        <!-- Encabezado Principal Institucional -->
-        <header class="main-header">
-            <div class="logo-area">
-                <span class="badge">Escuela N° 4-038 "Arturo Jauretche"</span>
-                <h1>Simulador de Aromas y Cata</h1>
-                <span class="sub-badge">Espacio Curricular: Enología</span>
+    <div class="container">
+        <!-- Encabezado y Estadísticas -->
+        <header class="app-header">
+            <div class="header-main">
+                <h1>🍷 Simulador de Cata Enológica</h1>
+                <p class="subtitle">Análisis sensorial y deducción aromática</p>
             </div>
             <div class="header-actions">
                 <div class="theme-switch-wrapper">
@@ -25,102 +20,86 @@
                     <button id="open-wheel-btn" class="wheel-btn">🔍 Consultar Rueda</button>
                 </div>
                 <div class="stats-bar">
-                    <!-- Contenido de las estadísticas -->
-                </div>
-            </div>
                     <div class="stat-card">
                         <span class="stat-label">Puntaje</span>
                         <span id="score-display" class="stat-value">0</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-label">Muestra</span>
+                        <span class="stat-label">Progreso</span>
                         <span id="case-counter" class="stat-value">1 / 10</span>
                     </div>
                 </div>
             </div>
         </header>
 
-        <!-- Tarjeta Principal del Juego -->
-        <main class="game-card">
-            <section class="sample-info">
-                <div class="sample-header">
-                    <span id="sample-badge" class="sample-badge">Muestra #1</span>
-                    <span id="sample-perception" class="sample-perception">Vía Nasal Directa</span>
-                </div>
-                <h2 id="sample-title">Cargando caso...</h2>
-                <p id="sample-description" class="sample-description">
-                    Cargando la descripción sensorial de la muestra...
-                </p>
-            </section>
-
-            <hr class="divider">
-
-            <!-- Panel de Deducción por Pasos -->
-            <section class="deduction-panel">
-                <div id="step-1-container" class="step-block active">
-                    <div class="step-header">
-                        <span class="step-number">1</span>
-                        <h3>Clasificación General</h3>
-                    </div>
-                    <p class="step-hint">¿A qué categoría pertenece según su origen bioquímico?</p>
-                    <div id="macro-options" class="options-grid"></div>
-                </div>
-
-                <div id="step-2-container" class="step-block hidden">
-                    <div class="step-header">
-                        <span class="step-number">2</span>
-                        <h3>Familia Aromática</h3>
-                    </div>
-                    <p class="step-hint">Selecciona la familia de la Rueda Aromaster (88 aromas):</p>
-                    <div id="family-options" class="options-grid"></div>
-                </div>
-
-                <div id="step-3-container" class="step-block hidden">
-                    <div class="step-header">
-                        <span class="step-number">3</span>
-                        <h3>Descriptor Específico</h3>
-                    </div>
-                    <p class="step-hint">¿Cuál es el aroma exacto identificado?</p>
-                    <div id="descriptor-options" class="options-grid"></div>
-                </div>
-            </section>
-
-            <!-- Retroalimentación Didáctica -->
-            <section id="feedback-modal" class="feedback-box hidden">
-                <div id="feedback-status" class="feedback-header">¡Correcto!</div>
-                <p id="feedback-text" class="feedback-body"></p>
-                <button id="next-btn" class="primary-btn">Siguiente Muestra →</button>
-            </section>
-            <!-- Pantalla de Resultados Finales -->
-            <section id="end-screen" class="end-screen hidden">
-                <div class="end-header">
-                    <h2>🏆 ¡Taller de Cata Completado!</h2>
-                    <p>Has finalizado el análisis sensorial de las 10 muestras.</p>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-score">
-                        <span class="score-number" id="final-score">0</span>
-                        <span class="score-label">Puntos Totales</span>
-                    </div>
-                    <div class="summary-rank">
-                        <span class="rank-title">Nivel de Sommelier:</span>
-                        <span class="rank-badge" id="final-rank">Catador en Formación</span>
-                    </div>
-                </div>
-                <button id="restart-btn" class="primary-btn">🔄 Reiniciar Taller de Cata</button>
-            </section>
-        </main>
-    </div>
-
-    <!-- Modal Emergente de la Rueda Aromaster (88 Aromas) -->
-    <div id="wheel-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Rueda de los Aromas del Vino (88 Aromas)</h3>
-                <button id="close-wheel-btn" class="close-btn">&times;</button>
+        <!-- Información de la Muestra Actual -->
+        <section class="sample-info game-card">
+            <div class="sample-header">
+                <span id="sample-badge" class="badge">Muestra #1</span>
+                <span id="sample-perception" class="perception-tag">Percepción Visual/Gustativa</span>
             </div>
-            <div class="modal-body">
-                <img src="assets/rueda_aromaster.jpg" alt="Rueda Aromaster de 88 Aromas" class="wheel-image">
+            <h2 id="sample-title">Título del Vino</h2>
+            <p id="sample-description">Cargando detalles de la cata...</p>
+        </section>
+
+        <!-- Panel de Deducción en 3 Pasos -->
+        <section class="deduction-panel game-card">
+            <!-- Paso 1 -->
+            <div id="step-1-container" class="step-block active">
+                <h3>Paso 1: Clasificación General (Macro)</h3>
+                <p class="step-desc">Determina el origen primario o defecto principal del aroma:</p>
+                <div id="macro-options" class="options-grid"></div>
+            </div>
+
+            <!-- Paso 2 -->
+            <div id="step-2-container" class="step-block hidden">
+                <h3>Paso 2: Familia Aromática</h3>
+                <p class="step-desc">Identifica la familia aromática específica del perfil seleccionado:</p>
+                <div id="family-options" class="options-grid"></div>
+            </div>
+
+            <!-- Paso 3 -->
+            <div id="step-3-container" class="step-block hidden">
+                <h3>Paso 3: Descriptor Específico</h3>
+                <p class="step-desc">Selecciona la nota aromática exacta detectada en la muestra:</p>
+                <div id="descriptor-options" class="options-grid"></div>
+            </div>
+        </section>
+
+        <!-- Modal de Retroalimentación -->
+        <div id="feedback-modal" class="modal-overlay hidden">
+            <div class="modal-content feedback-box">
+                <h3 id="feedback-status">Análisis Sensorial</h3>
+                <p id="feedback-text"></p>
+                <button id="next-btn" class="action-btn">Siguiente Muestra ➔</button>
+            </div>
+        </div>
+
+        <!-- Pantalla Final de Resultado -->
+        <section id="end-screen" class="game-card hidden text-center">
+            <h2>¡Taller de Cata Finalizado!</h2>
+            <p class="end-desc">Has completado el análisis sensorial de todas las muestras.</p>
+            <div class="final-results">
+                <div class="result-box">
+                    <span class="result-label">Puntaje Total</span>
+                    <span id="final-score" class="result-value">0</span>
+                </div>
+                <div class="result-box">
+                    <span class="result-label">Nivel Alcanzado</span>
+                    <span id="final-rank" class="result-rank">-</span>
+                </div>
+            </div>
+            <button id="restart-btn" class="action-btn">Reiniciar Simulador 🔄</button>
+        </section>
+
+        <!-- Modal de Rueda Aromaster -->
+        <div id="wheel-modal" class="modal-overlay hidden">
+            <div class="modal-content wheel-box">
+                <button id="close-wheel-btn" class="close-btn">&times;</button>
+                <h3>Rueda de Aromas del Vino</h3>
+                <div class="img-wrapper">
+                    <img src="assets/rueda_aromaster.jpg" alt="Rueda Aromaster de Aromas del Vino">
+                </div>
             </div>
         </div>
     </div>
