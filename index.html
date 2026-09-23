@@ -8,20 +8,18 @@
 </head>
 <body>
     <div class="container">
-        <!-- Encabezado Principal con Íconos SVG Minimalistas -->
+        <!-- Encabezado Principal -->
         <header class="app-header">
             <div class="header-main">
                 <h1>🍷 Simulador de Cata Enológica</h1>
-                <p class="subtitle">Análisis sensorial y deducción aromática</p>
+                <p class="subtitle">Análisis sensorial y deducción en árbol interactivo</p>
             </div>
             <div class="header-actions">
                 <div class="theme-switch-wrapper">
                     <button id="theme-toggle" class="theme-btn" title="Cambiar tema visual">
-                        <!-- SVG Luna (Modo Oscuro) -->
                         <svg id="moon-icon" class="theme-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                         </svg>
-                        <!-- SVG Sol (Modo Claro) -->
                         <svg id="sun-icon" class="theme-svg hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="5"></circle>
                             <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -59,66 +57,54 @@
             <p id="sample-description">Cargando detalles sensoriales de la muestra...</p>
         </section>
 
-        <!-- ESQUEMA RAMIFICADO INTERACTIVO (MAPA CONCEPTUAL) -->
-        <section class="tree-container game-card">
-            <h3 class="tree-title">Ruta de Deducción Sensorial</h3>
-            <div class="tree-diagram">
-                <!-- Nodo Origen -->
-                <div class="tree-node active-node" id="node-root">
-                    <span class="node-step">Muestra</span>
-                    <strong id="node-root-text">Copa de Vino</strong>
-                </div>
-
-                <div class="tree-connector" id="line-1"></div>
-
-                <!-- Nodo Paso 1: Macro -->
-                <div class="tree-node pending-node" id="node-macro">
-                    <span class="node-step">Nivel 1: Macro</span>
-                    <strong id="node-macro-text">¿Origen o Defecto?</strong>
-                </div>
-
-                <div class="tree-connector" id="line-2"></div>
-
-                <!-- Nodo Paso 2: Familia -->
-                <div class="tree-node pending-node" id="node-family">
-                    <span class="node-step">Nivel 2: Familia</span>
-                    <strong id="node-family-text">¿Familia Aromática?</strong>
-                </div>
-
-                <div class="tree-connector" id="line-3"></div>
-
-                <!-- Nodo Paso 3: Descriptor -->
-                <div class="tree-node pending-node" id="node-descriptor">
-                    <span class="node-step">Nivel 3: Descriptor</span>
-                    <strong id="node-descriptor-text">¿Nota Específica?</strong>
-                </div>
-            </div>
-        </section>
-
-        <!-- Panel de Selección de Opciones -->
-        <section class="deduction-panel game-card">
-            <div id="step-1-container" class="step-block active">
-                <h3>Paso 1: Clasificación General (Macro)</h3>
-                <p class="step-desc">Selecciona la categoría macro del aroma detectado:</p>
-                <div id="macro-options" class="options-grid"></div>
+        <!-- ESQUEMA RAMIFICADO TOP-DOWN ANIMADO -->
+        <section class="tree-interactive-section game-card">
+            <div class="tree-header">
+                <h3>Árbol de Deducción Aromática</h3>
+                <p class="tree-instruction">Selecciona tus opciones para formar la rama. Toca una casilla elegida para deshacer e inspeccionar alternativas.</p>
             </div>
 
-            <div id="step-2-container" class="step-block hidden">
-                <h3>Paso 2: Familia Aromática</h3>
-                <p class="step-desc">Identifica la familia dentro del grupo seleccionado:</p>
-                <div id="family-options" class="options-grid"></div>
+            <div class="tree-canvas">
+                <!-- NODO RAÍZ -->
+                <div class="root-node-wrapper">
+                    <div id="root-node" class="tree-node root-node active-node">
+                        <span class="node-tag">Copa de Vino</span>
+                        <strong id="root-node-title">Muestra Activa</strong>
+                    </div>
+                </div>
+
+                <!-- LÍNEA CONECTORA 1 -->
+                <div id="line-1" class="tree-line"></div>
+
+                <!-- NIVEL 1: CLASIFICACIÓN MACRO -->
+                <div class="tree-level-container">
+                    <span class="level-label">Nivel 1: Clasificación General</span>
+                    <div id="level-1-options" class="options-branch-grid"></div>
+                </div>
+
+                <!-- LÍNEA CONECTORA 2 -->
+                <div id="line-2" class="tree-line"></div>
+
+                <!-- NIVEL 2: FAMILIA AROMÁTICA -->
+                <div id="level-2-wrapper" class="tree-level-container hidden">
+                    <span class="level-label">Nivel 2: Familia Aromática</span>
+                    <div id="level-2-options" class="options-branch-grid"></div>
+                </div>
+
+                <!-- LÍNEA CONECTORA 3 -->
+                <div id="line-3" class="tree-line"></div>
+
+                <!-- NIVEL 3: DESCRIPTOR ESPECÍFICO -->
+                <div id="level-3-wrapper" class="tree-level-container hidden">
+                    <span class="level-label">Nivel 3: Descriptor Específico</span>
+                    <div id="level-3-options" class="options-branch-grid"></div>
+                </div>
             </div>
 
-            <div id="step-3-container" class="step-block hidden">
-                <h3>Paso 3: Descriptor Específico</h3>
-                <p class="step-desc">Determina la nota aromática final:</p>
-                <div id="descriptor-options" class="options-grid"></div>
-            </div>
-
-            <!-- Botón de Confirmación -->
-            <div class="confirm-wrapper">
-                <button id="confirm-btn" class="action-btn confirm-btn" disabled>
-                    Confirmar Selección ➔
+            <!-- BOTÓN DE VERIFICACIÓN FINAL -->
+            <div class="confirm-bar">
+                <button id="verify-btn" class="action-btn confirm-btn" disabled>
+                    Verificar Selección ➔
                 </button>
             </div>
         </section>

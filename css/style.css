@@ -10,16 +10,13 @@
     --wine-primary: #72092c;
     --wine-accent: #a81335;
     --gold: #d4af37;
-    --active-branch: #a81335;
     --text-main: #f0f1f7;
     --text-muted: #8e92ab;
     --shadow-main: 0 16px 36px rgba(0, 0, 0, 0.45);
     
-    /* RADIO DE BORDES HIPER-CURVADOS (ESTILO GEMINI/MATERIAL 3) */
     --radius-card: 28px;
     --radius-pill: 9999px;
     --radius-btn: 24px;
-    --radius-node: 22px;
 }
 
 [data-theme="light"] {
@@ -31,7 +28,6 @@
     --wine-primary: #7a001e;
     --wine-accent: #b8143a;
     --gold: #b58d1d;
-    --active-branch: #b8143a;
     --text-main: #14151e;
     --text-muted: #5e6278;
     --shadow-main: 0 16px 36px rgba(0, 0, 0, 0.06);
@@ -52,16 +48,14 @@ body {
 }
 
 .container {
-    max-width: 960px;
+    max-width: 920px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 22px;
 }
 
-/* ==========================================
-   ENCABEZADO E ÍCONOS SVG MINIMALISTAS
-   ========================================== */
+/* ENCABEZADO */
 .app-header {
     display: flex;
     justify-content: space-between;
@@ -72,52 +66,24 @@ body {
     border-bottom: 2px solid var(--border-color);
 }
 
-.header-main h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-}
-
-.subtitle {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.theme-switch-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+.header-main h1 { font-size: 1.75rem; font-weight: 700; }
+.subtitle { color: var(--text-muted); font-size: 0.9rem; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.theme-switch-wrapper { display: flex; align-items: center; gap: 10px; }
 
 .theme-btn {
     background: var(--bg-element);
     border: 1px solid var(--border-color);
     color: var(--text-main);
-    width: 46px;
-    height: 46px;
+    width: 46px; height: 46px;
     border-radius: var(--radius-pill);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.theme-btn:hover {
-    border-color: var(--gold);
-    transform: scale(1.08);
-}
-
-.theme-svg {
-    width: 20px;
-    height: 20px;
-    stroke: var(--text-main);
-}
+.theme-btn:hover { border-color: var(--gold); transform: scale(1.08); }
+.theme-svg { width: 20px; height: 20px; stroke: var(--text-main); }
 
 .wheel-btn, .action-btn {
     background: var(--wine-accent);
@@ -137,37 +103,18 @@ body {
     box-shadow: 0 6px 18px rgba(168, 19, 53, 0.3);
 }
 
-.stats-bar {
-    display: flex;
-    gap: 10px;
-}
-
+.stats-bar { display: flex; gap: 10px; }
 .stat-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     padding: 8px 16px;
     border-radius: var(--radius-btn);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: flex; flex-direction: column; align-items: center;
 }
+.stat-label { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; }
+.stat-value { font-size: 1.1rem; font-weight: bold; color: var(--gold); }
 
-.stat-label {
-    font-size: 0.68rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stat-value {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--gold);
-}
-
-/* ==========================================
-   TARJETAS PRINCIPALES CON BORDES CURVADOS
-   ========================================== */
+/* TARJETAS */
 .game-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -194,166 +141,140 @@ body {
     font-size: 0.8rem;
 }
 
-.sample-header {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.sample-info h2 {
-    font-size: 1.4rem;
-    margin-bottom: 6px;
-}
-
-.sample-info p {
-    color: var(--text-muted);
-    line-height: 1.5;
-}
+.sample-header { display: flex; gap: 10px; margin-bottom: 12px; }
+.sample-info h2 { font-size: 1.4rem; margin-bottom: 6px; }
+.sample-info p { color: var(--text-muted); line-height: 1.5; }
 
 /* ==========================================
-   ESQUEMA RAMIFICADO INTERACTIVO (TREE)
+   ESQUEMA EN ÁRBOL CON ANIMACIÓN DE COLAPSO
    ========================================== */
-.tree-container {
+.tree-header { margin-bottom: 20px; text-align: center; }
+.tree-header h3 { font-size: 1.2rem; margin-bottom: 4px; }
+.tree-instruction { font-size: 0.85rem; color: var(--text-muted); }
+
+.tree-canvas {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-}
-
-.tree-title {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-}
-
-.tree-diagram {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 8px 0;
 }
+
+.root-node-wrapper { display: flex; justify-content: center; width: 100%; }
 
 .tree-node {
     background: var(--bg-element);
     border: 2px solid var(--border-color);
-    border-radius: var(--radius-node);
-    padding: 14px 18px;
-    min-width: 155px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: var(--radius-btn);
+    padding: 14px 24px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 180px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.node-step {
+.node-tag { font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); }
+
+.root-node {
+    border-color: var(--gold);
+    background: var(--bg-hover);
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.2);
+}
+
+/* LÍNEAS CONECTORAS CON ANIMACIÓN DE COLOR */
+.tree-line {
+    width: 3px;
+    height: 32px;
+    background: var(--border-color);
+    margin: 0 auto;
+    opacity: 0.3;
+    transition: background 0.4s ease, box-shadow 0.4s ease, opacity 0.4s ease;
+}
+
+.tree-line.active {
+    background: var(--wine-accent);
+    box-shadow: 0 0 12px var(--wine-accent);
+    opacity: 1;
+}
+
+.tree-level-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.4s ease;
+}
+
+.level-label {
     font-size: 0.72rem;
     text-transform: uppercase;
     color: var(--text-muted);
+    letter-spacing: 0.8px;
 }
 
-.tree-node strong {
-    font-size: 0.9rem;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.options-branch-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
 }
 
-/* Estado Activo con Resplandor */
-.tree-node.active-node {
-    border-color: var(--active-branch);
-    background: var(--bg-hover);
-    box-shadow: 0 0 20px rgba(168, 19, 53, 0.28);
-    transform: scale(1.02);
-}
-
-.tree-node.active-node strong {
-    color: var(--gold);
-}
-
-/* Estado Pendiente */
-.tree-node.pending-node {
-    opacity: 0.5;
-    border-style: dashed;
-}
-
-/* Líneas Conectoras */
-.tree-connector {
-    height: 3px;
-    width: 28px;
-    background: var(--border-color);
-    flex-shrink: 0;
-    transition: background-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.tree-connector.active-line {
-    background: var(--active-branch);
-    box-shadow: 0 0 10px var(--active-branch);
-}
-
-/* ==========================================
-   CUADROS DE SELECCIÓN REDONDEADOS (TIPO GEMINI)
-   ========================================== */
-.deduction-panel h3 {
-    font-size: 1.1rem;
-    margin-bottom: 4px;
-}
-
-.step-desc {
-    color: var(--text-muted);
-    font-size: 0.88rem;
-    margin-bottom: 16px;
-}
-
-.options-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 14px;
-}
-
-/* Opción de Selección con bordes muy curvados */
-.option-btn {
+/* CASILLAS / OPCIONES ANIMADAS */
+.option-node {
     background: var(--bg-element);
     border: 2px solid var(--border-color);
-    color: var(--text-main);
-    padding: 16px 22px;
     border-radius: var(--radius-btn);
+    padding: 14px 24px;
+    color: var(--text-main);
     font-size: 0.95rem;
     font-weight: 500;
     cursor: pointer;
-    text-align: left;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    max-width: 280px;
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.option-btn:hover {
-    background: var(--bg-hover);
+.option-node:hover {
     border-color: var(--wine-accent);
+    background: var(--bg-hover);
     transform: translateY(-2px);
 }
 
-/* Estado Preseleccionado antes de Confirmar */
-.option-btn.selected {
+/* Estado Elegido: Se destaca y permanece centrado */
+.option-node.selected-branch {
     border-color: var(--gold);
     background: var(--bg-hover);
-    box-shadow: 0 0 16px rgba(212, 175, 55, 0.3);
-    transform: translateY(-2px);
+    color: var(--gold);
+    font-weight: bold;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.35);
+    transform: scale(1.05);
 }
 
-/* Botón de Confirmación */
-.confirm-wrapper {
-    margin-top: 22px;
-    display: flex;
-    justify-content: flex-end;
+/* Estado Colapsado: Desaparece suavemente sin sobresaltos */
+.option-node.unselected-collapsed {
+    opacity: 0;
+    transform: scale(0.6);
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin: 0;
+    border-width: 0;
+    pointer-events: none;
+    overflow: hidden;
 }
+
+/* BOTÓN DE VERIFICACIÓN */
+.confirm-bar { margin-top: 28px; display: flex; justify-content: center; }
 
 .confirm-btn {
-    width: 100%;
-    max-width: 260px;
-    padding: 14px 24px;
-    font-size: 0.95rem;
+    width: 100%; max-width: 280px; padding: 16px 28px; font-size: 1rem;
 }
 
 .confirm-btn:disabled {
@@ -362,85 +283,42 @@ body {
     border: 1px solid var(--border-color);
     cursor: not-allowed;
     transform: none;
-    opacity: 0.5;
+    opacity: 0.4;
     box-shadow: none;
 }
 
-/* ==========================================
-   MODALES Y PANTALLA FINAL
-   ========================================== */
+/* MODALES */
 .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(5px);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 1000;
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px);
+    display: flex; justify-content: center; align-items: center; z-index: 1000;
 }
 
 .modal-content {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-card);
-    padding: 28px;
-    max-width: 520px; width: 90%;
-    text-align: center;
-    box-shadow: var(--shadow-main);
+    padding: 28px; max-width: 520px; width: 90%;
+    text-align: center; box-shadow: var(--shadow-main);
 }
 
-.feedback-box h3 {
-    margin-bottom: 10px;
-}
+.feedback-box h3 { margin-bottom: 10px; font-size: 1.3rem; }
+.feedback-box p { color: var(--text-muted); margin-bottom: 22px; line-height: 1.5; white-space: pre-line; }
 
-.feedback-box p {
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    line-height: 1.5;
-}
-
-.final-results {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 24px 0;
-}
-
+.final-results { display: flex; justify-content: center; gap: 20px; margin: 24px 0; }
 .result-box {
-    background: var(--bg-element);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-btn);
-    padding: 16px 24px;
-    display: flex; flex-direction: column;
+    background: var(--bg-element); border: 1px solid var(--border-color);
+    border-radius: var(--radius-btn); padding: 16px 24px; display: flex; flex-direction: column;
 }
-
-.result-label {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.result-value, .result-rank {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: var(--gold);
-    margin-top: 4px;
-}
+.result-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+.result-value, .result-rank { font-size: 1.4rem; font-weight: bold; color: var(--gold); margin-top: 4px; }
 
 .close-btn {
-    position: absolute;
-    top: 16px; right: 20px;
-    background: transparent;
-    border: none;
-    font-size: 1.8rem;
-    color: var(--text-muted);
-    cursor: pointer;
+    position: absolute; top: 16px; right: 20px;
+    background: transparent; border: none; font-size: 1.8rem;
+    color: var(--text-muted); cursor: pointer;
 }
 
-.img-wrapper img {
-    max-width: 100%;
-    border-radius: 16px;
-    margin-top: 14px;
-}
-
+.img-wrapper img { max-width: 100%; border-radius: 16px; margin-top: 14px; }
 .hidden { display: none !important; }
 .text-center { text-align: center; }
