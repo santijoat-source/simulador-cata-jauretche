@@ -1,21 +1,35 @@
-// ==========================================
-// ESTADO DEL JUEGO Y SELECCIÓN DE ELEMENTOS
-// ==========================================
 let score = 0;
 let casoActualIndex = 0;
+let pasoActual = 1; // 1: Macro, 2: Familia, 3: Descriptor
+let seleccionTemporal = null; // Almacena la opción preseleccionada
 
-// Elementos del Encabezado y Estadísticas
+// Elementos de la Interfaz
 const scoreDisplay = document.getElementById('score-display');
 const caseCounter = document.getElementById('case-counter');
 const themeToggleBtn = document.getElementById('theme-toggle');
+const moonIcon = document.getElementById('moon-icon');
+const sunIcon = document.getElementById('sun-icon');
 
-// Elementos de la Muestra
+// Nodos y Líneas del Esquema Ramificado
+const nodeRootText = document.getElementById('node-root-text');
+const nodeMacro = document.getElementById('node-macro');
+const nodeMacroText = document.getElementById('node-macro-text');
+const nodeFamily = document.getElementById('node-family');
+const nodeFamilyText = document.getElementById('node-family-text');
+const nodeDescriptor = document.getElementById('node-descriptor');
+const nodeDescriptorText = document.getElementById('node-descriptor-text');
+
+const line1 = document.getElementById('line-1');
+const line2 = document.getElementById('line-2');
+const line3 = document.getElementById('line-3');
+
+// Muestra Actual
 const sampleBadge = document.getElementById('sample-badge');
 const samplePerception = document.getElementById('sample-perception');
 const sampleTitle = document.getElementById('sample-title');
 const sampleDescription = document.getElementById('sample-description');
 
-// Contenedores de Pasos y Opciones
+// Pasos y Opciones
 const step1Container = document.getElementById('step-1-container');
 const step2Container = document.getElementById('step-2-container');
 const step3Container = document.getElementById('step-3-container');
@@ -23,84 +37,116 @@ const step3Container = document.getElementById('step-3-container');
 const macroOptions = document.getElementById('macro-options');
 const familyOptions = document.getElementById('family-options');
 const descriptorOptions = document.getElementById('descriptor-options');
+const confirmBtn = document.getElementById('confirm-btn');
 
-// Retroalimentación y Botón Siguiente
+// Feedback y Fin de Juego
 const feedbackModal = document.getElementById('feedback-modal');
 const feedbackStatus = document.getElementById('feedback-status');
 const feedbackText = document.getElementById('feedback-text');
 const nextBtn = document.getElementById('next-btn');
 
-// Pantalla Final
 const endScreen = document.getElementById('end-screen');
 const finalScoreEl = document.getElementById('final-score');
 const finalRankEl = document.getElementById('final-rank');
 const restartBtn = document.getElementById('restart-btn');
 
-// Modal de la Rueda Aromaster
+// Modal Rueda
 const openWheelBtn = document.getElementById('open-wheel-btn');
 const closeWheelBtn = document.getElementById('close-wheel-btn');
 const wheelModal = document.getElementById('wheel-modal');
 
-// ==========================================
-// INICIALIZACIÓN
-// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    inicializarTema();
+    configurarTemaSVG();
     cargarCasoActual();
     configurarEventosGlobales();
 });
 
 // ==========================================
-// CONTROL DE MODO OSCURO / MODO CLARO
+// CONMUTADOR DE TEMA CON ÍCONOS SVG
 // ==========================================
-function inicializarTema() {
+function configurarTemaSVG() {
     const themeGuardado = localStorage.getItem('theme-preference') || 'dark';
+    
     if (themeGuardado === 'light') {
         document.documentElement.setAttribute('data-theme', 'light');
-        if (themeToggleBtn) themeToggleBtn.textContent = '☀️';
+        moonIcon.classList.add('hidden');
+        sunIcon.classList.remove('hidden');
     }
 
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            const esClaro = document.documentElement.getAttribute('data-theme') === 'light';
-            if (esClaro) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem('theme-preference', 'dark');
-                themeToggleBtn.textContent = '🌙';
-            } else {
-                document.documentElement.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme-preference', 'light');
-                themeToggleBtn.textContent = '☀️';
-            }
-        });
-    }
+    themeToggleBtn.addEventListener('click', () => {
+        const esClaro = document.documentElement.getAttribute('data-theme') === 'light';
+        
+        if (esClaro) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme-preference', 'dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme-preference', 'light');
+            moonIcon.classList.add('hidden');
+            sunIcon.classList.remove('hidden');
+        }
+    });
 }
 
 // ==========================================
-// CARGAR Y MOSTRAR CASO
+// CONTROL DEL ESQUEMA Y FLUJO
 // ==========================================
+function resetearEsquema(tituloVino) {
+    nodeRootText.textContent = tituloVino;
+    
+    nodeMacro.className = "tree-node pending-node";
+    nodeMacroText.textContent = "¿Origen o Defecto?";
+    
+    nodeFamily.className = "tree-node pending-node";
+    nodeFamilyText.textContent = "¿Familia Aromática?";
+    
+    nodeDescriptor.className = "tree-node pending-node";
+    nodeDescriptorText.textContent = "¿Nota Específica?";
+    
+    line1.className = "tree-connector";
+    line2.className = "tree-connector";
+    line3.className = "tree-connector";
+}
+
+function deshabilitarConfirmacion() {
+    seleccionTemporal = null;
+    confirmBtn.disabled = true;
+}
+
 function cargarCasoActual() {
     const caso = CASOS_ENOLOGIA[casoActualIndex];
+    pasoActual = 1;
 
-    // Resetear visibilidad de contenedores
     feedbackModal.classList.add('hidden');
     step1Container.classList.remove('hidden');
-    step1Container.classList.add('active');
     step2Container.classList.add('hidden');
     step3Container.classList.add('hidden');
 
-    // Actualizar Encabezado de la Muestra actual
     sampleBadge.textContent = `Muestra #${caso.id}`;
     samplePerception.textContent = caso.percepcion;
     sampleTitle.textContent = caso.titulo;
     sampleDescription.textContent = caso.descripcion;
     caseCounter.textContent = `${casoActualIndex + 1} / ${CASOS_ENOLOGIA.length}`;
 
-    // Cargar opciones del Paso 1
+    resetearEsquema(caso.titulo);
+    deshabilitarConfirmacion();
     renderPaso1(caso);
 }
 
-// Paso 1: Clasificación General (Macro)
+// Preselección de Opción (Sin Evaluación Inmediata)
+function seleccionarOpcion(opcionTexto, elementoBoton, nodoTextoTarget) {
+    document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    elementoBoton.classList.add('selected');
+    seleccionTemporal = opcionTexto;
+    confirmBtn.disabled = false;
+
+    // Muestra borrador previo en el esquema
+    nodoTextoTarget.textContent = opcionTexto;
+}
+
 function renderPaso1(caso) {
     macroOptions.innerHTML = '';
     const opciones = mezclarArreglo([caso.macroCorrecta, ...caso.distractoresMacro]);
@@ -109,25 +155,11 @@ function renderPaso1(caso) {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.textContent = opcion;
-        btn.onclick = () => verificarPaso1(opcion, caso);
+        btn.onclick = () => seleccionarOpcion(opcion, btn, nodeMacroText);
         macroOptions.appendChild(btn);
     });
 }
 
-function verificarPaso1(seleccion, caso) {
-    if (seleccion === caso.macroCorrecta) {
-        score += 5;
-        scoreDisplay.textContent = score;
-        step1Container.classList.add('hidden');
-        step2Container.classList.remove('hidden');
-        step2Container.classList.add('active');
-        renderPaso2(caso);
-    } else {
-        mostrarFeedback(false, `Categoría incorrecta. '${seleccion}' no coincide con la clasificación macro de esta muestra.`);
-    }
-}
-
-// Paso 2: Familia Aromática
 function renderPaso2(caso) {
     familyOptions.innerHTML = '';
     const opciones = mezclarArreglo([caso.familiaCorrecta, ...caso.distractoresFamilia]);
@@ -136,25 +168,11 @@ function renderPaso2(caso) {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.textContent = opcion;
-        btn.onclick = () => verificarPaso2(opcion, caso);
+        btn.onclick = () => seleccionarOpcion(opcion, btn, nodeFamilyText);
         familyOptions.appendChild(btn);
     });
 }
 
-function verificarPaso2(seleccion, caso) {
-    if (seleccion === caso.familiaCorrecta) {
-        score += 5;
-        scoreDisplay.textContent = score;
-        step2Container.classList.add('hidden');
-        step3Container.classList.remove('hidden');
-        step3Container.classList.add('active');
-        renderPaso3(caso);
-    } else {
-        mostrarFeedback(false, `Familia incorrecta. '${seleccion}' no pertenece al grupo aromático de este vino.`);
-    }
-}
-
-// Paso 3: Descriptor Específico
 function renderPaso3(caso) {
     descriptorOptions.innerHTML = '';
     const opciones = mezclarArreglo([caso.descriptorCorrecto, ...caso.distractoresDescriptor]);
@@ -163,42 +181,73 @@ function renderPaso3(caso) {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.textContent = opcion;
-        btn.onclick = () => verificarPaso3(opcion, caso);
+        btn.onclick = () => seleccionarOpcion(opcion, btn, nodeDescriptorText);
         descriptorOptions.appendChild(btn);
     });
 }
 
-function verificarPaso3(seleccion, caso) {
-    if (seleccion === caso.descriptorCorrecto) {
-        score += 5;
-        scoreDisplay.textContent = score;
-        mostrarFeedback(true, `¡Excelente deducción! ${caso.explicacion}`);
-    } else {
-        mostrarFeedback(false, `Descriptor incorrecto. '${seleccion}' no es el aroma específico de esta muestra.`);
-    }
-}
+// EVENTO PRINCIPAL: Clic en "Confirmar Selección"
+confirmBtn.addEventListener('click', () => {
+    if (!seleccionTemporal) return;
 
-// ==========================================
-// MOSTRAR RETROALIMENTACIÓN
-// ==========================================
+    const caso = CASOS_ENOLOGIA[casoActualIndex];
+
+    if (pasoActual === 1) {
+        if (seleccionTemporal === caso.macroCorrecta) {
+            score += 5;
+            scoreDisplay.textContent = score;
+
+            nodeMacro.className = "tree-node active-node";
+            line1.className = "tree-connector active-line";
+
+            step1Container.classList.add('hidden');
+            step2Container.classList.remove('hidden');
+            pasoActual = 2;
+            deshabilitarConfirmacion();
+            renderPaso2(caso);
+        } else {
+            mostrarFeedback(false, `Selección incorrecta. '${seleccionTemporal}' no corresponde a la clasificación macro de esta muestra.`);
+        }
+    } else if (pasoActual === 2) {
+        if (seleccionTemporal === caso.familiaCorrecta) {
+            score += 5;
+            scoreDisplay.textContent = score;
+
+            nodeFamily.className = "tree-node active-node";
+            line2.className = "tree-connector active-line";
+
+            step2Container.classList.add('hidden');
+            step3Container.classList.remove('hidden');
+            pasoActual = 3;
+            deshabilitarConfirmacion();
+            renderPaso3(caso);
+        } else {
+            mostrarFeedback(false, `Familia incorrecta. '${seleccionTemporal}' no pertenece al perfil aromático de este vino.`);
+        }
+    } else if (pasoActual === 3) {
+        if (seleccionTemporal === caso.descriptorCorrecto) {
+            score += 5;
+            scoreDisplay.textContent = score;
+
+            nodeDescriptor.className = "tree-node active-node";
+            line3.className = "tree-connector active-line";
+
+            mostrarFeedback(true, `¡Deducción perfecta! ${caso.explicacion}`);
+        } else {
+            mostrarFeedback(false, `Descriptor incorrecto. '${seleccionTemporal}' no es la nota específica de esta muestra.`);
+        }
+    }
+});
+
 function mostrarFeedback(esCorrecto, mensaje) {
     feedbackModal.classList.remove('hidden');
-    if (esCorrecto) {
-        feedbackStatus.textContent = "¡Análisis Sensorial Correcto! (+15 pts)";
-        feedbackStatus.style.color = "#2e7d32";
-    } else {
-        feedbackStatus.textContent = "Análisis Incorrecto";
-        feedbackStatus.style.color = "#c62828";
-    }
+    feedbackStatus.textContent = esCorrecto ? "¡Análisis Correcto! (+15 pts)" : "Análisis Incorrecto";
+    feedbackStatus.style.color = esCorrecto ? "#2e7d32" : "#c62828";
     feedbackText.textContent = mensaje;
 }
 
-// ==========================================
-// EVENTO: SIGUIENTE MUESTRA Y FIN DE JUEGO
-// ==========================================
 nextBtn.addEventListener('click', () => {
     casoActualIndex++;
-    
     if (casoActualIndex < CASOS_ENOLOGIA.length) {
         cargarCasoActual();
     } else {
@@ -206,26 +255,14 @@ nextBtn.addEventListener('click', () => {
     }
 });
 
-// ==========================================
-// PANTALLA FINAL Y REINICIO
-// ==========================================
 function mostrarPantallaFinal() {
     document.querySelector('.sample-info').classList.add('hidden');
+    document.querySelector('.tree-container').classList.add('hidden');
     document.querySelector('.deduction-panel').classList.add('hidden');
     feedbackModal.classList.add('hidden');
     
     finalScoreEl.textContent = score;
-    
-    if (score >= 130) {
-        finalRankEl.textContent = "🥇 Enólogo Master / Catador Experto";
-    } else if (score >= 90) {
-        finalRankEl.textContent = "🥈 Sommelier Avanzado";
-    } else if (score >= 50) {
-        finalRankEl.textContent = "🥉 Analista Sensorial Jr.";
-    } else {
-        finalRankEl.textContent = "🍷 Estudiante de Enología";
-    }
-    
+    finalRankEl.textContent = score >= 130 ? "🥇 Enólogo Master" : score >= 90 ? "🥈 Sommelier Avanzado" : "🥉 Estudiante Jr.";
     endScreen.classList.remove('hidden');
 }
 
@@ -235,27 +272,16 @@ restartBtn.addEventListener('click', () => {
     scoreDisplay.textContent = '0';
     endScreen.classList.add('hidden');
     document.querySelector('.sample-info').classList.remove('hidden');
+    document.querySelector('.tree-container').classList.remove('hidden');
     document.querySelector('.deduction-panel').classList.remove('hidden');
     cargarCasoActual();
 });
 
-// ==========================================
-// EVENTOS DE LA RUEDA AROMASTER
-// ==========================================
 function configurarEventosGlobales() {
     if (openWheelBtn) openWheelBtn.addEventListener('click', () => wheelModal.classList.remove('hidden'));
     if (closeWheelBtn) closeWheelBtn.addEventListener('click', () => wheelModal.classList.add('hidden'));
-
-    if (wheelModal) {
-        wheelModal.addEventListener('click', (e) => {
-            if (e.target === wheelModal) {
-                wheelModal.classList.add('hidden');
-            }
-        });
-    }
 }
 
-// Función auxiliar para mezclar opciones
 function mezclarArreglo(arreglo) {
     return [...arreglo].sort(() => Math.random() - 0.5);
 }
