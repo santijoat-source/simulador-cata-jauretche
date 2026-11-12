@@ -1,12 +1,38 @@
+// Base de datos jerárquica libre basada en la Rueda Ultimate (Sin rutas forzadas)
+const JERARQUIA_AROMAS = {
+    "Aromas Primarios": {
+        "Frutas de Vino Blanco": ["Limón", "Lima", "Pomelo", "Mandarina", "Grosella espinosa", "Pera", "Manzana", "Manzana verde", "Durazno", "Melón", "Guayaba", "Piña", "Maracuyá", "Lichi", "Plátano", "Albaricoque seco", "Cáscara de naranja"],
+        "Frutas de Vino Tinto": ["Grosella", "Grosella negra", "Frutilla", "Mora", "Frambuesa", "Cereza", "Ciruela", "Pasa"],
+        "Floral": ["Madreselva", "Majuelo", "Flor de naranja", "Tilo", "Jazmín", "Acacia", "Rosa", "Lavanda", "Violeta"],
+        "Vegetal": ["Pimiento", "Tomate", "Hinojo", "Pasto cortado", "Eneldo", "Tomillo", "Menta", "Helecho", "Heno", "Tabaco", "Té negro", "Hoja de laurel", "Eucalipto", "Hoja de grosella negra"],
+        "Mineral": ["Sílex", "Queroseno", "Yodo"]
+    },
+    "Aromas Secundarios": {
+        "Levaduras": ["Pan"],
+        "Fermentación Malo-Láctica": ["Mantequilla", "Yogur"]
+    },
+    "Aromas Terciarios": {
+        "Crianza en Barrica de Roble": ["Pino", "Cedro", "Sándalo", "Roble", "Almendra", "Avellana", "Coco", "Clavel", "Nuez moscada", "Regaliz", "Canela", "Pimienta", "Vainilla", "Alquitrán", "Humo", "Tocino", "Café", "Tostada", "Chocolate", "Caramelo"],
+        "Vino Blanco Añejo": ["Miel", "Membrillo"],
+        "Vino Tinto Añejo": ["Musgo de Árbol", "Trufa", "Seta", "Cuero", "Almizcle", "Salsa de carne"]
+    },
+    "Defectos": {
+        "Enfermedad del Corcho": ["Sabor al corcho - TCA"],
+        "Oxidado": ["Jerez"],
+        "Calor": ["Madera"],
+        "Acidez Volátil": ["Vinagre", "Disolvente de Tinta de uñas"],
+        "Sulfitos": ["Caucho", "Cebolla", "Maíz", "Huevo putrefacto"],
+        "Brett": ["Sudor de caballo", "Vendaje añejo"]
+    }
+};
+
 let score = 0;
 let casoActualIndex = 0;
 
-// Estado del Árbol de Selecciones
 let selectedMacro = null;
 let selectedFamily = null;
 let selectedDescriptor = null;
 
-// Referencias a Elementos DOM
 const scoreDisplay = document.getElementById('score-display');
 const caseCounter = document.getElementById('case-counter');
 const themeToggleBtn = document.getElementById('theme-toggle');
@@ -51,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
     configurarEventosGlobales();
 });
 
-// TEMA VISUAL
 function configurarTemaSVG() {
     const themeGuardado = localStorage.getItem('theme-preference') || 'dark';
     if (themeGuardado === 'light') {
@@ -76,7 +101,6 @@ function configurarTemaSVG() {
     });
 }
 
-// MUESTRA
 function cargarCasoActual() {
     const caso = CASOS_ENOLOGIA[casoActualIndex];
 
@@ -103,14 +127,11 @@ function cargarCasoActual() {
     renderNivel1(caso);
 }
 
-// ==========================================
-// LÓGICA DE SELECCIÓN E INTERACTIVIDAD EN ÁRBOL
-// ==========================================
-
-// NIVEL 1: MACRO
+// --- NIVEL 1: MACRO ---
 function renderNivel1(caso) {
     level1Options.innerHTML = '';
-    const opciones = mezclarArreglo([caso.macroCorrecta, ...caso.distractoresMacro]);
+    const macros = Object.keys(JERARQUIA_AROMAS);
+    const opciones = mezclarArreglo(macros);
 
     opciones.forEach(opcion => {
         const btn = document.createElement('button');
@@ -122,7 +143,6 @@ function renderNivel1(caso) {
 }
 
 function handleSelectNivel1(opcionTexto, elementoBoton, caso) {
-    // Si vuelve a tocar el seleccionado -> Deshacer selección (Backtracking)
     if (selectedMacro === opcionTexto) {
         deselectNivel1();
         return;
@@ -131,7 +151,6 @@ function handleSelectNivel1(opcionTexto, elementoBoton, caso) {
     selectedMacro = opcionTexto;
     line1.className = 'tree-line active';
 
-    // Animación: Las casillas no elegidas colapsan a 0, la elegida se centra y resalta
     const botones = level1Options.querySelectorAll('.option-node');
     botones.forEach(btn => {
         if (btn === elementoBoton) {
@@ -173,10 +192,20 @@ function deselectNivel1() {
     });
 }
 
-// NIVEL 2: FAMILIA
+// --- NIVEL 2: FAMILIA (Dinámica libre) ---
 function renderNivel2(caso) {
     level2Options.innerHTML = '';
-    const opciones = mezclarArreglo([caso.familiaCorrecta, ...caso.distractoresFamilia]);
+    
+    // Obtener familias válidas para el macro seleccionado y añadir algunas de otros macros como distractores reales
+    const familiasValidas = Object.keys(JERARQUIA_AROMAS[selectedMacro] || {});
+    let otrasFamilias = [];
+    for (let m in JERARQUIA_AROMAS) {
+        if (m !== selectedMacro) {
+            otrasFamilias.push(...Object.keys(JERARQUIA_AROMAS[m]));
+        }
+    }
+    const distractores = mezclarArreglo(otrasFamilias).slice(0, 2);
+    const opciones = mezclarArreglo([...familiasValidas, ...distractores]);
 
     opciones.forEach(opcion => {
         const btn = document.createElement('button');
@@ -231,10 +260,35 @@ function deselectNivel2() {
     });
 }
 
-// NIVEL 3: DESCRIPTOR
+// --- NIVEL 3: DESCRIPTOR (Dinámico según la familia elegida) ---
 function renderNivel3(caso) {
     level3Options.innerHTML = '';
-    const opciones = mezclarArreglo([caso.descriptorCorrecto, ...caso.distractoresDescriptor]);
+    
+    let descriptoresValidos = [];
+    if (JERARQUIA_AROMAS[selectedMacro] && JERARQUIA_AROMAS[selectedMacro][selectedFamily]) {
+        descriptoresValidos = JERARQUIA_AROMAS[selectedMacro][selectedFamily];
+    } else {
+        // Si eligió una familia distractor de otro macro, buscar sus descriptores reales
+        for (let m in JERARQUIA_AROMAS) {
+            if (JERARQUIA_AROMAS[m][selectedFamily]) {
+                descriptoresValidos = JERARQUIA_AROMAS[m][selectedFamily];
+                break;
+            }
+        }
+    }
+    if (descriptoresValidos.length === 0) descriptoresValidos = ["Desconocido"];
+
+    // Obtener otros descriptores de otras familias del mismo macro como distractores
+    let otrosDescriptores = [];
+    if (JERARQUIA_AROMAS[selectedMacro]) {
+        for (let f in JERARQUIA_AROMAS[selectedMacro]) {
+            if (f !== selectedFamily) {
+                otrosDescriptores.push(...JERARQUIA_AROMAS[selectedMacro][f]);
+            }
+        }
+    }
+    const distractores = mezclarArreglo(otrosDescriptores).slice(0, 3);
+    const opciones = mezclarArreglo([...descriptoresValidos, ...distractores]);
 
     opciones.forEach(opcion => {
         const btn = document.createElement('button');
@@ -265,7 +319,6 @@ function handleSelectNivel3(opcionTexto, elementoBoton) {
         }
     });
 
-    // Habilitar verificación única al completar la ruta
     verifyBtn.disabled = false;
 }
 
@@ -280,7 +333,7 @@ function deselectNivel3() {
     });
 }
 
-// VERIFICACIÓN FINAL (EVALUACIÓN DIFERIDA)
+// VERIFICACIÓN FINAL Y EVALUACIÓN
 verifyBtn.addEventListener('click', () => {
     if (!selectedMacro || !selectedFamily || !selectedDescriptor) return;
 
@@ -290,7 +343,7 @@ verifyBtn.addEventListener('click', () => {
     const esFamiliaCorrecta = selectedFamily === caso.familiaCorrecta;
     const esDescriptorCorrecto = selectedDescriptor === caso.descriptorCorrecto;
 
-    const esExitoTotal = esMacroCorrecto && esFamiliaCorrecta && esDescriptorCorrecto;
+    const esExitoTotal = esMacroCorrecto && esFamiliaCorrecto && esDescriptorCorrecto;
 
     if (esExitoTotal) {
         score += 15;
@@ -298,18 +351,18 @@ verifyBtn.addEventListener('click', () => {
         mostrarFeedback(true, `¡Deducción perfecta del perfil sensorial!\n\n${caso.explicacion}`);
     } else {
         let detallesError = [];
-        if (!esMacroCorrecto) detallesError.push(`• Nivel 1 (Macro): Seleccionaste '${selectedMacro}' (Correcto: '${caso.macroCorrecta}')`);
-        if (!esFamiliaCorrecta) detallesError.push(`• Nivel 2 (Familia): Seleccionaste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
-        if (!esDescriptorCorrecto) detallesError.push(`• Nivel 3 (Descriptor): Seleccionaste '${selectedDescriptor}' (Correcto: '${caso.descriptorCorrecto}')`);
+        if (!esMacroCorrecto) detallesError.push(`• Clasificación General: Seleccionaste '${selectedMacro}' (Correcto: '${caso.macroCorrecta}')`);
+        if (!esFamiliaCorrecta) detallesError.push(`• Familia Aromática: Seleccionaste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
+        if (!esDescriptorCorrecto) detallesError.push(`• Descriptor Específico: Seleccionaste '${selectedDescriptor}' (Correcto: '${caso.descriptorCorrecto}')`);
 
-        mostrarFeedback(false, `Tu deducción presentó las siguientes inconsistencias:\n\n${detallesError.join('\n')}\n\nPuedes consultar la Rueda Aromaster para repasar.`);
+        mostrarFeedback(false, `Tu análisis sensorial presentó discrepancias:\n\n${detallesError.join('\n')}\n\nRevisa la Rueda de Aromas para repasar.`);
     }
 });
 
 function mostrarFeedback(esCorrecto, mensaje) {
     feedbackModal.classList.remove('hidden');
     feedbackStatus.textContent = esCorrecto ? "¡Análisis Sensorial Correcto! (+15 pts)" : "Discrepancia en el Análisis";
-    feedbackStatus.style.color = esCorrecto ? "#2e7d32" : "#c62828";
+    feedbackStatus.style.color = esCorrecto ? "#DFB6B2" : "#DFB6B2";
     feedbackText.innerText = mensaje;
 }
 
