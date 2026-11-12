@@ -1,4 +1,3 @@
-// Base de datos jerárquica libre basada en la Rueda Ultimate (Sin rutas forzadas)
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
         "Frutas de Vino Blanco": ["Limón", "Lima", "Pomelo", "Mandarina", "Grosella espinosa", "Pera", "Manzana", "Manzana verde", "Durazno", "Melón", "Guayaba", "Piña", "Maracuyá", "Lichi", "Plátano", "Albaricoque seco", "Cáscara de naranja"],
@@ -60,6 +59,7 @@ const sampleDescription = document.getElementById('sample-description');
 const feedbackModal = document.getElementById('feedback-modal');
 const feedbackStatus = document.getElementById('feedback-status');
 const feedbackText = document.getElementById('feedback-text');
+const feedbackExtra = document.getElementById('feedback-extra');
 const nextBtn = document.getElementById('next-btn');
 
 const endScreen = document.getElementById('end-screen');
@@ -192,11 +192,9 @@ function deselectNivel1() {
     });
 }
 
-// --- NIVEL 2: FAMILIA (Dinámica libre) ---
+// --- NIVEL 2: FAMILIA ---
 function renderNivel2(caso) {
     level2Options.innerHTML = '';
-    
-    // Obtener familias válidas para el macro seleccionado y añadir algunas de otros macros como distractores reales
     const familiasValidas = Object.keys(JERARQUIA_AROMAS[selectedMacro] || {});
     let otrasFamilias = [];
     for (let m in JERARQUIA_AROMAS) {
@@ -260,7 +258,7 @@ function deselectNivel2() {
     });
 }
 
-// --- NIVEL 3: DESCRIPTOR (Dinámico según la familia elegida) ---
+// --- NIVEL 3: DESCRIPTOR ---
 function renderNivel3(caso) {
     level3Options.innerHTML = '';
     
@@ -268,7 +266,6 @@ function renderNivel3(caso) {
     if (JERARQUIA_AROMAS[selectedMacro] && JERARQUIA_AROMAS[selectedMacro][selectedFamily]) {
         descriptoresValidos = JERARQUIA_AROMAS[selectedMacro][selectedFamily];
     } else {
-        // Si eligió una familia distractor de otro macro, buscar sus descriptores reales
         for (let m in JERARQUIA_AROMAS) {
             if (JERARQUIA_AROMAS[m][selectedFamily]) {
                 descriptoresValidos = JERARQUIA_AROMAS[m][selectedFamily];
@@ -278,7 +275,6 @@ function renderNivel3(caso) {
     }
     if (descriptoresValidos.length === 0) descriptoresValidos = ["Desconocido"];
 
-    // Obtener otros descriptores de otras familias del mismo macro como distractores
     let otrosDescriptores = [];
     if (JERARQUIA_AROMAS[selectedMacro]) {
         for (let f in JERARQUIA_AROMAS[selectedMacro]) {
@@ -333,7 +329,7 @@ function deselectNivel3() {
     });
 }
 
-// VERIFICACIÓN FINAL Y EVALUACIÓN
+// VERIFICACIÓN FINAL CON FEEDBACK Y DATOS CURIOSOS
 verifyBtn.addEventListener('click', () => {
     if (!selectedMacro || !selectedFamily || !selectedDescriptor) return;
 
@@ -343,27 +339,35 @@ verifyBtn.addEventListener('click', () => {
     const esFamiliaCorrecta = selectedFamily === caso.familiaCorrecta;
     const esDescriptorCorrecto = selectedDescriptor === caso.descriptorCorrecto;
 
-    const esExitoTotal = esMacroCorrecto && esFamiliaCorrecto && esDescriptorCorrecto;
+    const esExitoTotal = esMacroCorrecto && esFamiliaCorrecta && esDescriptorCorrecto;
 
     if (esExitoTotal) {
         score += 15;
         scoreDisplay.textContent = score;
-        mostrarFeedback(true, `¡Deducción perfecta del perfil sensorial!\n\n${caso.explicacion}`);
+        mostrarFeedback(true, `¡Felicitaciones! Análisis sensorial perfecto.\n\n${caso.explicacion}`, caso.datoCurioso);
     } else {
         let detallesError = [];
-        if (!esMacroCorrecto) detallesError.push(`• Clasificación General: Seleccionaste '${selectedMacro}' (Correcto: '${caso.macroCorrecta}')`);
-        if (!esFamiliaCorrecta) detallesError.push(`• Familia Aromática: Seleccionaste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
-        if (!esDescriptorCorrecto) detallesError.push(`• Descriptor Específico: Seleccionaste '${selectedDescriptor}' (Correcto: '${caso.descriptorCorrecto}')`);
+        if (!esMacroCorrecto) detallesError.push(`• General: Elegiste '${selectedMacro}' (Correcto: '${caso.macroCorrecta}')`);
+        if (!esFamiliaCorrecta) detallesError.push(`• Familia: Elegiste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
+        if (!esDescriptorCorrecto) detallesError.push(`• Descriptor: Elegiste '${selectedDescriptor}' (Correcto: '${caso.descriptorCorrecto}')`);
 
-        mostrarFeedback(false, `Tu análisis sensorial presentó discrepancias:\n\n${detallesError.join('\n')}\n\nRevisa la Rueda de Aromas para repasar.`);
+        mostrarFeedback(false, `Tu deducción presentó discrepancias:\n\n${detallesError.join('\n')}\n\nExplicación técnica:\n${caso.explicacion}`, null);
     }
 });
 
-function mostrarFeedback(esCorrecto, mensaje) {
+function mostrarFeedback(esCorrecto, mensaje, datoCurioso) {
     feedbackModal.classList.remove('hidden');
-    feedbackStatus.textContent = esCorrecto ? "¡Análisis Sensorial Correcto! (+15 pts)" : "Discrepancia en el Análisis";
+    feedbackStatus.textContent = esCorrecto ? "✨ ¡Análisis Correcto! (+15 pts)" : "⚠️ Discrepancia en el Análisis";
     feedbackStatus.style.color = esCorrecto ? "#DFB6B2" : "#DFB6B2";
     feedbackText.innerText = mensaje;
+
+    if (esCorrecto && datoCurioso) {
+        feedbackExtra.classList.remove('hidden');
+        feedbackExtra.innerHTML = `<h4>💡 Sabías que...</h4><p>${datoCurioso}</p>`;
+    } else {
+        feedbackExtra.classList.add('hidden');
+        feedbackExtra.innerHTML = '';
+    }
 }
 
 nextBtn.addEventListener('click', () => {
