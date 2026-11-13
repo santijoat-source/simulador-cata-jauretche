@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Cata Enológica</title>
+    <title>Simulador de Cata Enológica - Profesional</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
         <header class="app-header">
             <div class="header-main">
                 <h1>🍷 Simulador de Cata Enológica</h1>
-                <p class="subtitle">Análisis sensorial y deducción en árbol interactivo</p>
+                <p class="subtitle">Plataforma Sensorial y Pedagógica - Edición Agrotécnica</p>
             </div>
             <div class="header-actions">
                 <div class="theme-switch-wrapper">
@@ -48,40 +48,60 @@
             </div>
         </header>
 
-        <!-- ================= PANTALLA HOME (MENÚ PRINCIPAL) ================= -->
+        <!-- ================= PANTALLA HOME (SELECTOR DE MODOS) ================= -->
         <section id="home-screen" class="game-card home-container text-center">
             <div class="home-hero">
-                <span class="badge">Escuela Agrotécnica • Edición Enología</span>
-                <h2>Bienvenido al Simulador Sensorial</h2>
-                <p>Domina el arte de la cata a ciegas y la deducción aromática utilizando la estructura oficial de la Rueda de Aromas Ultimate.</p>
+                <span class="badge">Escuela Agrotécnica • Enología</span>
+                <h2>Selecciona el Módulo de Práctica</h2>
+                <p>Elige una modalidad de entrenamiento sensorial para desarrollar tus habilidades analíticas en cava.</p>
             </div>
-            <div class="home-menu-actions">
-                <button id="start-game-btn" class="action-btn menu-main-btn">🎮 Iniciar Sesión de Cata</button>
-                <button id="open-about-btn" class="wheel-btn menu-sec-btn">📖 Acerca del Simulador</button>
+            
+            <div class="mode-grid">
+                <div class="mode-card" data-mode="aroma">
+                    <div class="mode-icon">🍇</div>
+                    <h3>Árbol Olfativo (Rueda Ultimate)</h3>
+                    <p>Deducción guiada por familias y descriptores sin caminos forzados.</p>
+                    <button class="action-btn mode-btn">Iniciar Módulo ➔</button>
+                </div>
+
+                <div class="mode-card" data-mode="visual">
+                    <div class="mode-icon">👁️</div>
+                    <h3>Fase Visual en Copa</h3>
+                    <p>Analiza tonalidades, capa e indicios de evolución y edad del vino.</p>
+                    <button class="action-btn mode-btn">Iniciar Módulo ➔</button>
+                </div>
+
+                <div class="mode-card" data-mode="examen">
+                    <div class="mode-icon">⏱️</div>
+                    <h3>Modo Examen (Evaluación)</h3>
+                    <p>Prueba cronometrada sin ayuda externa para calificación oficial.</p>
+                    <button class="action-btn mode-btn">Comenzar Examen ➔</button>
+                </div>
+            </div>
+
+            <div class="home-footer-actions">
+                <button id="open-about-btn" class="wheel-btn">📖 Acerca del Simulador</button>
             </div>
         </section>
 
-        <!-- ================= CONTENEDOR DE JUEGO ================= -->
+        <!-- ================= MÓDULO 1: ÁRBOL OLFATIVO ================= -->
         <div id="game-container" class="hidden game-flow-wrapper">
-            <!-- Información de la Muestra Actual -->
             <section class="sample-info game-card">
                 <div class="sample-header">
                     <span id="sample-badge" class="badge">Muestra #1</span>
                     <span id="sample-perception" class="perception-tag">Percepción Olfativa</span>
                 </div>
                 <h2 id="sample-title">Cargando Muestra...</h2>
-                <p id="sample-description">Cargando detalles sensoriales de la muestra...</p>
+                <p id="sample-description">Cargando detalles sensoriales...</p>
             </section>
 
-            <!-- ESQUEMA RAMIFICADO TOP-DOWN ESTRICTAMENTE CENTRADO -->
             <section class="tree-interactive-section game-card">
                 <div class="tree-header">
                     <h3>Árbol de Deducción Aromática</h3>
-                    <p class="tree-instruction">Selecciona tus opciones con total libertad. Toca una casilla elegida para cambiar de opinión.</p>
+                    <p class="tree-instruction">Selecciona tus opciones. Toca una casilla elegida para cambiar de opinión.</p>
                 </div>
 
                 <div class="tree-canvas">
-                    <!-- NODO RAÍZ -->
                     <div class="root-node-wrapper">
                         <div id="root-node" class="tree-node root-node active-node">
                             <span class="node-tag">Copa de Vino</span>
@@ -89,39 +109,60 @@
                         </div>
                     </div>
 
-                    <!-- LÍNEA CONECTORA 1 -->
                     <div id="line-1" class="tree-line"></div>
-
-                    <!-- NIVEL 1: CLASIFICACIÓN MACRO -->
                     <div class="tree-level-container">
                         <span class="level-label">Clasificación General</span>
                         <div id="level-1-options" class="options-branch-grid"></div>
                     </div>
 
-                    <!-- LÍNEA CONECTORA 2 -->
                     <div id="line-2" class="tree-line"></div>
-
-                    <!-- NIVEL 2: FAMILIA AROMÁTICA -->
                     <div id="level-2-wrapper" class="tree-level-container hidden">
                         <span class="level-label">Familia Aromática</span>
                         <div id="level-2-options" class="options-branch-grid"></div>
                     </div>
 
-                    <!-- LÍNEA CONECTORA 3 -->
                     <div id="line-3" class="tree-line"></div>
-
-                    <!-- NIVEL 3: DESCRIPTOR ESPECÍFICO -->
                     <div id="level-3-wrapper" class="tree-level-container hidden">
                         <span class="level-label">Descriptor Específico</span>
                         <div id="level-3-options" class="options-branch-grid"></div>
                     </div>
                 </div>
 
-                <!-- BOTÓN DE VERIFICACIÓN FINAL -->
                 <div class="confirm-bar">
-                    <button id="verify-btn" class="action-btn confirm-btn" disabled>
-                        Verificar Selección ➔
-                    </button>
+                    <button id="verify-btn" class="action-btn confirm-btn" disabled>Verificar Selección ➔</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= MÓDULO 2: FASE VISUAL ================= -->
+        <div id="visual-container" class="hidden game-flow-wrapper">
+            <section class="sample-info game-card">
+                <div class="sample-header">
+                    <span id="vis-badge" class="badge">Fase Visual #1</span>
+                    <span class="perception-tag">Análisis Cromático</span>
+                </div>
+                <h2 id="vis-title">Cargando Muestra Visual...</h2>
+                <p id="vis-description">Observa la intensidad y tonalidad en el menisco de la copa.</p>
+            </section>
+
+            <section class="tree-interactive-section game-card text-center">
+                <div class="wine-glass-preview">
+                    <div id="wine-liquid" class="wine-liquid-sample"></div>
+                </div>
+                
+                <div class="visual-questions-group">
+                    <div class="v-group">
+                        <label class="level-label">1. Intensidad / Capa</label>
+                        <div id="capa-options" class="options-branch-grid"></div>
+                    </div>
+                    <div class="v-group" style="margin-top: 16px;">
+                        <label class="level-label">2. Tonalidad Predominante</label>
+                        <div id="tono-options" class="options-branch-grid"></div>
+                    </div>
+                </div>
+
+                <div class="confirm-bar">
+                    <button id="verify-vis-btn" class="action-btn confirm-btn" disabled>Verificar Análisis Visual ➔</button>
                 </div>
             </section>
         </div>
@@ -136,24 +177,29 @@
             </div>
         </div>
 
-        <!-- Pantalla Final -->
+        <!-- Pantalla Final (Ficha Técnica / Reporte) -->
         <section id="end-screen" class="game-card hidden text-center">
-            <h2>¡Taller de Cata Completado!</h2>
-            <p class="end-desc">Has analizado todas las muestras programadas.</p>
+            <h2>📄 Ficha Técnica de Resultados</h2>
+            <p class="end-desc">Evaluación completada con éxito para registro académico.</p>
+            
             <div class="final-results">
                 <div class="result-box">
                     <span class="result-label">Puntaje Total</span>
                     <span id="final-score" class="result-value">0</span>
                 </div>
                 <div class="result-box">
-                    <span class="result-label">Nivel Obtenido</span>
+                    <span class="result-label">Calificación</span>
                     <span id="final-rank" class="result-rank">-</span>
                 </div>
             </div>
-            <button id="restart-menu-btn" class="action-btn">Volver al Menú Principal 🏠</button>
+
+            <div class="home-menu-actions" style="margin-top: 20px;">
+                <button id="print-report-btn" class="wheel-btn">🖨️ Imprimir / Guardar Ficha</button>
+                <button id="restart-menu-btn" class="action-btn">Volver al Menú Principal 🏠</button>
+            </div>
         </section>
 
-        <!-- Modal Rueda Aromaster -->
+        <!-- Modales Auxiliares -->
         <div id="wheel-modal" class="modal-overlay hidden">
             <div class="modal-content wheel-box">
                 <button id="close-wheel-btn" class="close-btn">&times;</button>
@@ -164,13 +210,12 @@
             </div>
         </div>
 
-        <!-- Modal Acerca de -->
         <div id="about-modal" class="modal-overlay hidden">
             <div class="modal-content feedback-box">
                 <button id="close-about-btn" class="close-btn">&times;</button>
-                <h3>Acerca del Simulador</h3>
+                <h3>Acerca del Simulador Enológico</h3>
                 <p style="text-align: left; margin-top: 10px;">
-                    Desarrollado con enfoque pedagógico para prácticas de enología y viticultura. Permite entrenar la memoria olfativa mediante análisis sensorial estructurado en base a la Rueda de Aromas Ultimate, evitando caminos forzados y promoviendo el aprendizaje autónomo por deducción.
+                    Desarrollado bajo estrictos estándares pedagógicos de UX/UI para entrenamiento sensorial en instituciones agrotécnicas. Permite evaluar fases olfativas y visuales sin sesgos ni caminos forzados.
                 </p>
             </div>
         </div>
