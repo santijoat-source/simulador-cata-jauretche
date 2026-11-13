@@ -96,7 +96,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Vegetal",
         descriptorCorrecto: "Pasto cortado",
         explicacion: "Los tioles volátiles otorgan al Sauvignon Blanc ese perfil herbáceo tan fresco de pasto cortado y hoja de higuera.",
-        datoCurioso: "🌱 **Dato Enológico:** Es una de las variedades preferidas para climas templados-fríos, exigiendo un manejo preciso del follaje en el viñedo para concentrar sus característicos aromas."
+        datoCurioso: "🌱 **Dato Enológico:** Es una de las preferidas para climas templados-fríos, exigiendo un manejo preciso del follaje en el viñedo para concentrar sus característicos aromas."
     },
     {
         id: 10,

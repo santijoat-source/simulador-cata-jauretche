@@ -1,4 +1,4 @@
-// Estructura jerárquica estrictamente limpia según la Rueda Ultimate
+// Estructura jerárquica estricta basada 100% en la Rueda de Aromas Ultimate
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
         "Frutas de Vino Blanco": ["Limón", "Lima", "Pomelo", "Mandarina", "Grosella espinosa", "Pera", "Manzana", "Manzana verde", "Durazno", "Melón", "Guayaba", "Piña", "Maracuyá", "Lichi", "Plátano", "Albaricoque seco", "Cáscara de naranja"],
@@ -33,6 +33,17 @@ let selectedMacro = null;
 let selectedFamily = null;
 let selectedDescriptor = null;
 
+// Elementos DOM
+const homeScreen = document.getElementById('home-screen');
+const gameContainer = document.getElementById('game-container');
+const statsContainer = document.getElementById('stats-container');
+const homeNavBtn = document.getElementById('home-nav-btn');
+const startGameBtn = document.getElementById('start-game-btn');
+const restartMenuBtn = document.getElementById('restart-menu-btn');
+const openAboutBtn = document.getElementById('open-about-btn');
+const aboutModal = document.getElementById('about-modal');
+const closeAboutBtn = document.getElementById('close-about-btn');
+
 const scoreDisplay = document.getElementById('score-display');
 const caseCounter = document.getElementById('case-counter');
 const themeToggleBtn = document.getElementById('theme-toggle');
@@ -66,7 +77,6 @@ const nextBtn = document.getElementById('next-btn');
 const endScreen = document.getElementById('end-screen');
 const finalScoreEl = document.getElementById('final-score');
 const finalRankEl = document.getElementById('final-rank');
-const restartBtn = document.getElementById('restart-btn');
 
 const openWheelBtn = document.getElementById('open-wheel-btn');
 const closeWheelBtn = document.getElementById('close-wheel-btn');
@@ -74,7 +84,7 @@ const wheelModal = document.getElementById('wheel-modal');
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarTemaSVG();
-    cargarCasoActual();
+    configurarNavegacionHome();
     configurarEventosGlobales();
 });
 
@@ -99,6 +109,36 @@ function configurarTemaSVG() {
             moonIcon.classList.add('hidden');
             sunIcon.classList.remove('hidden');
         }
+    });
+}
+
+function configurarNavegacionHome() {
+    startGameBtn.addEventListener('click', () => {
+        homeScreen.classList.add('hidden');
+        gameContainer.classList.remove('hidden');
+        statsContainer.classList.remove('hidden');
+        homeNavBtn.classList.remove('hidden');
+        score = 0;
+        casoActualIndex = 0;
+        scoreDisplay.textContent = '0';
+        endScreen.classList.add('hidden');
+        cargarCasoActual();
+    });
+
+    homeNavBtn.addEventListener('click', () => {
+        gameContainer.classList.add('hidden');
+        statsContainer.classList.add('hidden');
+        homeNavBtn.classList.add('hidden');
+        endScreen.classList.add('hidden');
+        feedbackModal.classList.add('hidden');
+        homeScreen.classList.remove('hidden');
+    });
+
+    restartMenuBtn.addEventListener('click', () => {
+        endScreen.classList.add('hidden');
+        homeScreen.classList.remove('hidden');
+        statsContainer.classList.add('hidden');
+        homeNavBtn.classList.add('hidden');
     });
 }
 
@@ -349,7 +389,7 @@ verifyBtn.addEventListener('click', () => {
     } else {
         let detallesError = [];
         if (!esMacroCorrecto) detallesError.push(`• General: Elegiste '${selectedMacro}' (Correcto: '${caso.macroCorrecta}')`);
-        if (!esFamiliaCorrecto) detallesError.push(`• Familia: Elegiste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
+        if (!esFamiliaCorrecta) detallesError.push(`• Familia: Elegiste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
         if (!esDescriptorCorrecto) detallesError.push(`• Descriptor: Elegiste '${selectedDescriptor}' (Correcto: '${caso.descriptorCorrecto}')`);
 
         mostrarFeedback(false, `Tu deducción presentó discrepancias:\n\n${detallesError.join('\n')}\n\nExplicación técnica:\n${caso.explicacion}`, null);
@@ -381,28 +421,18 @@ nextBtn.addEventListener('click', () => {
 });
 
 function mostrarPantallaFinal() {
-    document.querySelector('.sample-info').classList.add('hidden');
-    document.querySelector('.tree-interactive-section').classList.add('hidden');
+    gameContainer.classList.add('hidden');
     feedbackModal.classList.add('hidden');
 
     finalScoreEl.textContent = score;
-    finalRankEl.textContent = score >= 120 ? "🥇 Enólogo Master" : score >= 75 ? "🥈 Sommelier Avanzado" : "🥉 Estudiante Jr.";
     endScreen.classList.remove('hidden');
 }
-
-restartBtn.addEventListener('click', () => {
-    score = 0;
-    casoActualIndex = 0;
-    scoreDisplay.textContent = '0';
-    endScreen.classList.add('hidden');
-    document.querySelector('.sample-info').classList.remove('hidden');
-    document.querySelector('.tree-interactive-section').classList.remove('hidden');
-    cargarCasoActual();
-});
 
 function configurarEventosGlobales() {
     if (openWheelBtn) openWheelBtn.addEventListener('click', () => wheelModal.classList.remove('hidden'));
     if (closeWheelBtn) closeWheelBtn.addEventListener('click', () => wheelModal.classList.add('hidden'));
+    if (openAboutBtn) openAboutBtn.addEventListener('click', () => aboutModal.classList.remove('hidden'));
+    if (closeAboutBtn) closeAboutBtn.addEventListener('click', () => aboutModal.classList.add('hidden'));
 }
 
 function mezclarArreglo(arreglo) {

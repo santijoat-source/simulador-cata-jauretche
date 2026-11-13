@@ -16,6 +16,7 @@
             </div>
             <div class="header-actions">
                 <div class="theme-switch-wrapper">
+                    <button id="home-nav-btn" class="wheel-btn hidden" title="Volver al Menú Principal">🏠 Menú</button>
                     <button id="theme-toggle" class="theme-btn" title="Cambiar tema visual">
                         <svg id="moon-icon" class="theme-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -34,7 +35,7 @@
                     </button>
                     <button id="open-wheel-btn" class="wheel-btn">🔍 Consultar Rueda</button>
                 </div>
-                <div class="stats-bar">
+                <div id="stats-container" class="stats-bar hidden">
                     <div class="stat-card">
                         <span class="stat-label">Puntaje</span>
                         <span id="score-display" class="stat-value">0</span>
@@ -47,67 +48,83 @@
             </div>
         </header>
 
-        <!-- Información de la Muestra Actual -->
-        <section class="sample-info game-card">
-            <div class="sample-header">
-                <span id="sample-badge" class="badge">Muestra #1</span>
-                <span id="sample-perception" class="perception-tag">Percepción Olfativa</span>
+        <!-- ================= PANTALLA HOME (MENÚ PRINCIPAL) ================= -->
+        <section id="home-screen" class="game-card home-container text-center">
+            <div class="home-hero">
+                <span class="badge">Escuela Agrotécnica • Edición Enología</span>
+                <h2>Bienvenido al Simulador Sensorial</h2>
+                <p>Domina el arte de la cata a ciegas y la deducción aromática utilizando la estructura oficial de la Rueda de Aromas Ultimate.</p>
             </div>
-            <h2 id="sample-title">Cargando Muestra...</h2>
-            <p id="sample-description">Cargando detalles sensoriales de la muestra...</p>
+            <div class="home-menu-actions">
+                <button id="start-game-btn" class="action-btn menu-main-btn">🎮 Iniciar Sesión de Cata</button>
+                <button id="open-about-btn" class="wheel-btn menu-sec-btn">📖 Acerca del Simulador</button>
+            </div>
         </section>
 
-        <!-- ESQUEMA RAMIFICADO TOP-DOWN COMPACTO Y CENTRADO -->
-        <section class="tree-interactive-section game-card">
-            <div class="tree-header">
-                <h3>Árbol de Deducción Aromática</h3>
-                <p class="tree-instruction">Selecciona tus opciones con total libertad. Toca una casilla elegida para cambiar de opinión.</p>
-            </div>
+        <!-- ================= CONTENEDOR DE JUEGO ================= -->
+        <div id="game-container" class="hidden game-flow-wrapper">
+            <!-- Información de la Muestra Actual -->
+            <section class="sample-info game-card">
+                <div class="sample-header">
+                    <span id="sample-badge" class="badge">Muestra #1</span>
+                    <span id="sample-perception" class="perception-tag">Percepción Olfativa</span>
+                </div>
+                <h2 id="sample-title">Cargando Muestra...</h2>
+                <p id="sample-description">Cargando detalles sensoriales de la muestra...</p>
+            </section>
 
-            <div class="tree-canvas">
-                <!-- NODO RAÍZ -->
-                <div class="root-node-wrapper">
-                    <div id="root-node" class="tree-node root-node active-node">
-                        <span class="node-tag">Copa de Vino</span>
-                        <strong id="root-node-title">Muestra Activa</strong>
+            <!-- ESQUEMA RAMIFICADO TOP-DOWN ESTRICTAMENTE CENTRADO -->
+            <section class="tree-interactive-section game-card">
+                <div class="tree-header">
+                    <h3>Árbol de Deducción Aromática</h3>
+                    <p class="tree-instruction">Selecciona tus opciones con total libertad. Toca una casilla elegida para cambiar de opinión.</p>
+                </div>
+
+                <div class="tree-canvas">
+                    <!-- NODO RAÍZ -->
+                    <div class="root-node-wrapper">
+                        <div id="root-node" class="tree-node root-node active-node">
+                            <span class="node-tag">Copa de Vino</span>
+                            <strong id="root-node-title">Muestra Activa</strong>
+                        </div>
+                    </div>
+
+                    <!-- LÍNEA CONECTORA 1 -->
+                    <div id="line-1" class="tree-line"></div>
+
+                    <!-- NIVEL 1: CLASIFICACIÓN MACRO -->
+                    <div class="tree-level-container">
+                        <span class="level-label">Clasificación General</span>
+                        <div id="level-1-options" class="options-branch-grid"></div>
+                    </div>
+
+                    <!-- LÍNEA CONECTORA 2 -->
+                    <div id="line-2" class="tree-line"></div>
+
+                    <!-- NIVEL 2: FAMILIA AROMÁTICA -->
+                    <div id="level-2-wrapper" class="tree-level-container hidden">
+                        <span class="level-label">Familia Aromática</span>
+                        <div id="level-2-options" class="options-branch-grid"></div>
+                    </div>
+
+                    <!-- LÍNEA CONECTORA 3 -->
+                    <div id="line-3" class="tree-line"></div>
+
+                    <!-- NIVEL 3: DESCRIPTOR ESPECÍFICO -->
+                    <div id="level-3-wrapper" class="tree-level-container hidden">
+                        <span class="level-label">Descriptor Específico</span>
+                        <div id="level-3-options" class="options-branch-grid"></div>
                     </div>
                 </div>
 
-                <!-- LÍNEA CONECTORA 1 -->
-                <div id="line-1" class="tree-line"></div>
-
-                <!-- NIVEL 1: CLASIFICACIÓN MACRO -->
-                <div class="tree-level-container">
-                    <span class="level-label">Clasificación General</span>
-                    <div id="level-1-options" class="options-branch-grid"></div>
+                <!-- BOTÓN DE VERIFICACIÓN FINAL -->
+                <div class="confirm-bar">
+                    <button id="verify-btn" class="action-btn confirm-btn" disabled>
+                        Verificar Selección ➔
+                    </button>
                 </div>
-
-                <!-- LÍNEA CONECTORA 2 -->
-                <div id="line-2" class="tree-line"></div>
-
-                <!-- NIVEL 2: FAMILIA AROMÁTICA -->
-                <div id="level-2-wrapper" class="tree-level-container hidden">
-                    <span class="level-label">Familia Aromática</span>
-                    <div id="level-2-options" class="options-branch-grid"></div>
-                </div>
-
-                <!-- LÍNEA CONECTORA 3 -->
-                <div id="line-3" class="tree-line"></div>
-
-                <!-- NIVEL 3: DESCRIPTOR ESPECÍFICO -->
-                <div id="level-3-wrapper" class="tree-level-container hidden">
-                    <span class="level-label">Descriptor Específico</span>
-                    <div id="level-3-options" class="options-branch-grid"></div>
-                </div>
-            </div>
-
-            <!-- BOTÓN DE VERIFICACIÓN FINAL -->
-            <div class="confirm-bar">
-                <button id="verify-btn" class="action-btn confirm-btn" disabled>
-                    Verificar Selección ➔
-                </button>
-            </div>
-        </section>
+            </section>
+        </div>
 
         <!-- Modal de Feedback -->
         <div id="feedback-modal" class="modal-overlay hidden">
@@ -133,7 +150,7 @@
                     <span id="final-rank" class="result-rank">-</span>
                 </div>
             </div>
-            <button id="restart-btn" class="action-btn">Reiniciar Simulador 🔄</button>
+            <button id="restart-menu-btn" class="action-btn">Volver al Menú Principal 🏠</button>
         </section>
 
         <!-- Modal Rueda Aromaster -->
@@ -144,6 +161,17 @@
                 <div class="img-wrapper">
                     <img src="assets/rueda_aromaster.jpg" alt="Rueda Aromaster">
                 </div>
+            </div>
+        </div>
+
+        <!-- Modal Acerca de -->
+        <div id="about-modal" class="modal-overlay hidden">
+            <div class="modal-content feedback-box">
+                <button id="close-about-btn" class="close-btn">&times;</button>
+                <h3>Acerca del Simulador</h3>
+                <p style="text-align: left; margin-top: 10px;">
+                    Desarrollado con enfoque pedagógico para prácticas de enología y viticultura. Permite entrenar la memoria olfativa mediante análisis sensorial estructurado en base a la Rueda de Aromas Ultimate, evitando caminos forzados y promoviendo el aprendizaje autónomo por deducción.
+                </p>
             </div>
         </div>
     </div>
