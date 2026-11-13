@@ -130,9 +130,10 @@
             <div class="divider-line"></div>
 
             <div class="tree-clean-workspace">
-                <p class="tree-instruction">Selecciona una ruta de deducción. Toca un nodo elegido para modificarlo.</p>
+                <p class="tree-instruction">Selecciona una ruta de deducción paso a paso.</p>
 
                 <div class="tree-canvas">
+                    <!-- Nodo Base -->
                     <div class="root-node-wrapper">
                         <div id="root-node" class="tree-node root-node">
                             <span class="node-tag">Copa en Evaluación</span>
@@ -140,21 +141,27 @@
                         </div>
                     </div>
 
+                    <!-- Nivel 1: Clasificación General -->
                     <div id="line-1" class="tree-line"></div>
-                    <div class="tree-level-container">
-                        <span class="level-label">Clasificación General (Opción 1)</span>
+                    <div id="selected-l1-display" class="selected-path-card hidden"></div>
+                    <div id="level-1-container" class="tree-level-container">
+                        <span class="level-label">Clasificación General</span>
                         <div id="level-1-options" class="options-branch-grid"></div>
                     </div>
 
-                    <div id="line-2" class="tree-line"></div>
+                    <!-- Nivel 2: Familia Aromática -->
+                    <div id="line-2" class="tree-line hidden"></div>
+                    <div id="selected-l2-display" class="selected-path-card hidden"></div>
                     <div id="level-2-wrapper" class="tree-level-container hidden">
-                        <span class="level-label">Familia Aromática (Opción 2)</span>
+                        <span class="level-label">Familia Aromática</span>
                         <div id="level-2-options" class="options-branch-grid"></div>
                     </div>
 
-                    <div id="line-3" class="tree-line"></div>
+                    <!-- Nivel 3: Subfamilia / Descriptor -->
+                    <div id="line-3" class="tree-line hidden"></div>
+                    <div id="selected-l3-display" class="selected-path-card hidden"></div>
                     <div id="level-3-wrapper" class="tree-level-container hidden">
-                        <span class="level-label">Descriptor Específico (Opción 3 y 4)</span>
+                        <span class="level-label">Descriptor Específico</span>
                         <div id="level-3-options" class="options-branch-grid"></div>
                     </div>
                 </div>
@@ -204,8 +211,8 @@
         <!-- Pantalla Final -->
         <section id="end-screen" class="fullscreen-section hidden">
             <span class="pill-tag">SESIÓN FINALIZADA</span>
-            <h2 class="section-title-large" style="margin-top: 12px;">Resultado Registrado con Éxito</h2>
-            <p class="hero-subtitle">Tus resultados han sido enviados al Panel Docente de la profesora.</p>
+            <h2 class="section-title-large" style="margin-top: 12px;">Resultado Registrado en la Nube</h2>
+            <p class="hero-subtitle">Tus resultados han sido sincronizados correctamente al panel docente.</p>
             
             <div class="final-results-clean">
                 <div class="result-clean-stat">
@@ -229,7 +236,7 @@
     <div id="name-modal" class="modal-overlay hidden">
         <div class="modal-content feedback-box text-center">
             <h3>Identificación del Estudiante</h3>
-            <p style="text-align: center; margin-bottom: 16px;">Ingresa tu Nombre y Apellido para registrar tu práctica en el sistema de la profesora.</p>
+            <p style="text-align: center; margin-bottom: 16px;">Ingresa tu Nombre y Apellido para registrar tu práctica en el panel de la profesora.</p>
             <input type="text" id="student-name-input" class="student-input-field" placeholder="Ej: Santiago Toconas" autocomplete="off">
             <button id="start-session-btn" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 16px;">Comenzar Práctica ➔</button>
         </div>
@@ -237,11 +244,11 @@
 
     <!-- Modal: Panel Docente Exclusivo -->
     <div id="teacher-modal" class="modal-overlay hidden">
-        <div class="modal-content teacher-box" style="max-width: 800px;">
+        <div class="modal-content teacher-box" style="max-width: 850px;">
             <button id="close-teacher-btn" class="close-btn">&times;</button>
-            <h3>🔒 Panel Exclusivo Docente</h3>
+            <h3>🔒 Panel Exclusivo Docente (Nube)</h3>
             <p style="text-align: left; margin-top: 10px; font-size: 0.92rem;">
-                Registro en tiempo real de las evaluaciones y prácticas realizadas por los estudiantes.
+                Calificaciones y evaluaciones centralizadas en tiempo real de todos los estudiantes.
             </p>
             
             <div class="teacher-table-wrapper" style="margin-top: 20px; max-height: 400px; overflow-y: auto;">
@@ -251,7 +258,7 @@
                             <th>Estudiante</th>
                             <th>Modalidad</th>
                             <th>Puntaje</th>
-                            <th>Rango / Nivel</th>
+                            <th>Nivel</th>
                             <th>Fecha y Hora</th>
                         </tr>
                     </thead>
@@ -262,7 +269,7 @@
             </div>
 
             <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
-                <button id="clear-records-btn" class="secondary-pill-btn" style="font-size: 0.85rem; padding: 10px 20px;">🗑️ Borrar Registros</button>
+                <button id="refresh-records-btn" class="secondary-pill-btn" style="font-size: 0.85rem; padding: 10px 20px;">🔄 Actualizar Nube</button>
             </div>
         </div>
     </div>

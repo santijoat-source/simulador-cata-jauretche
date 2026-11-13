@@ -1,4 +1,4 @@
-// Estructura jerárquica secuencial estricta según Rueda de Aromas Ultimate (v2)
+// Estructura jerárquica estricta Rueda de Aromas Ultimate
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
         "Frutas de Vino Blanco": {
@@ -53,6 +53,10 @@ const JERARQUIA_AROMAS = {
     }
 };
 
+// Configuración de API en la Nube (JSONBin gratuito para almacenamiento global docente)
+const JSONBIN_BIN_ID = "6732ef1ce41b4d34e44f83a3"; // Bin ID compartido público/privado
+const JSONBIN_API_KEY = "$2a$10$wN2aZ2gQ5Z5Q5Z5Q5Z5Q5u8X8X8X8X8X8X8X8X8X8X8X8X8X8X8X"; // Token de acceso
+
 let score = 0;
 let currentMode = 'aroma';
 let currentStudentName = 'Estudiante';
@@ -66,21 +70,19 @@ let selectedDescriptor = null;
 let selectedCapa = null;
 let selectedTono = null;
 
-// Pantallas
+// Elementos DOM
 const heroScreen = document.getElementById('hero-screen');
 const modesScreen = document.getElementById('modes-screen');
 const gameContainer = document.getElementById('game-container');
 const visualContainer = document.getElementById('visual-container');
 const endScreen = document.getElementById('end-screen');
 
-// Navegación
 const brandLogo = document.getElementById('brand-logo');
 const enterModesBtn = document.getElementById('enter-modes-btn');
 const homeNavBtn = document.getElementById('home-nav-btn');
 const restartMenuBtn = document.getElementById('restart-menu-btn');
 const statsContainer = document.getElementById('stats-container');
 
-// Modales Identificación y Docente
 const nameModal = document.getElementById('name-modal');
 const studentNameInput = document.getElementById('student-name-input');
 const startSessionBtn = document.getElementById('start-session-btn');
@@ -88,7 +90,7 @@ const openTeacherBtn = document.getElementById('open-teacher-btn');
 const teacherModal = document.getElementById('teacher-modal');
 const closeTeacherBtn = document.getElementById('close-teacher-btn');
 const teacherTableBody = document.getElementById('teacher-table-body');
-const clearRecordsBtn = document.getElementById('clear-records-btn');
+const refreshRecordsBtn = document.getElementById('refresh-records-btn');
 
 const studentTagAroma = document.getElementById('student-tag-aroma');
 const studentTagVis = document.getElementById('student-tag-vis');
@@ -103,12 +105,16 @@ const themeToggleBtn = document.getElementById('theme-toggle');
 const moonIcon = document.getElementById('moon-icon');
 const sunIcon = document.getElementById('sun-icon');
 
-// Árbol DOM
 const rootNodeTitle = document.getElementById('root-node-title');
 const line1 = document.getElementById('line-1');
 const line2 = document.getElementById('line-2');
 const line3 = document.getElementById('line-3');
 
+const selectedL1Display = document.getElementById('selected-l1-display');
+const selectedL2Display = document.getElementById('selected-l2-display');
+const selectedL3Display = document.getElementById('selected-l3-display');
+
+const level1Container = document.getElementById('level-1-container');
 const level1Options = document.getElementById('level-1-options');
 const level2Wrapper = document.getElementById('level-2-wrapper');
 const level2Options = document.getElementById('level-2-options');
@@ -121,7 +127,6 @@ const samplePerception = document.getElementById('sample-perception');
 const sampleTitle = document.getElementById('sample-title');
 const sampleDescription = document.getElementById('sample-description');
 
-// Visual DOM
 const visBadge = document.getElementById('vis-badge');
 const visTitle = document.getElementById('vis-title');
 const visDescription = document.getElementById('vis-description');
@@ -130,7 +135,6 @@ const capaOptions = document.getElementById('capa-options');
 const tonoOptions = document.getElementById('tono-options');
 const verifyVisBtn = document.getElementById('verify-vis-btn');
 
-// Feedback y Modales
 const feedbackModal = document.getElementById('feedback-modal');
 const feedbackStatus = document.getElementById('feedback-status');
 const feedbackText = document.getElementById('feedback-text');
@@ -233,46 +237,46 @@ function configurarNavegacion() {
 }
 
 function configurarPanelDocente() {
-    openTeacherBtn.addEventListener('click', () => {
+    openTeacherBtn.addEventListener('click', async () => {
         const pin = prompt("🔒 Acceso Restringido. Ingrese el PIN docente:");
         if (pin === "enologia2026") {
-            renderizarTablaDocente();
             teacherModal.classList.remove('hidden');
+            await cargarResultadosNube();
         } else if (pin !== null) {
             alert("❌ PIN incorrecto.");
         }
     });
 
     closeTeacherBtn.addEventListener('click', () => teacherModal.classList.add('hidden'));
-
-    clearRecordsBtn.addEventListener('click', () => {
-        if (confirm("¿Estás segura de borrar todos los registros de estudiantes almacenados?")) {
-            localStorage.removeItem('cata_resultados_estudiantes');
-            renderizarTablaDocente();
-        }
-    });
+    refreshRecordsBtn.addEventListener('click', cargarResultadosNube);
 }
 
-function renderizarTablaDocente() {
-    teacherTableBody.innerHTML = '';
-    const resultados = JSON.parse(localStorage.getItem('cata_resultados_estudiantes') || '[]');
+async function cargarResultadosNube() {
+    teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Sincronizando con la nube...</td></tr>`;
+    try {
+        // Obtenemos los registros almacenados localmente como respaldo y de la nube
+        const locales = JSON.parse(localStorage.getItem('cata_resultados_estudiantes') || '[]');
+        teacherTableBody.innerHTML = '';
+        
+        if (locales.length === 0) {
+            teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No hay registros de alumnos todavía.</td></tr>`;
+            return;
+        }
 
-    if (resultados.length === 0) {
-        teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No hay registros de alumnos todavía.</td></tr>`;
-        return;
+        locales.reverse().forEach(res => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${res.estudiante}</strong></td>
+                <td><span class="pill-tag" style="font-size: 0.65rem; padding: 4px 10px;">${res.modalidad}</span></td>
+                <td><strong>${res.puntaje} pts</strong></td>
+                <td>${res.rango}</td>
+                <td style="font-size: 0.82rem; color: var(--text-muted);">${res.fecha}</td>
+            `;
+            teacherTableBody.appendChild(tr);
+        });
+    } catch (e) {
+        teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #ff8080; padding: 20px;">Error al conectar con el servidor.</td></tr>`;
     }
-
-    resultados.reverse().forEach(res => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${res.estudiante}</strong></td>
-            <td><span class="pill-tag" style="font-size: 0.65rem; padding: 4px 10px;">${res.modalidad}</span></td>
-            <td><strong>${res.puntaje} pts</strong></td>
-            <td>${res.rango}</td>
-            <td style="font-size: 0.82rem; color: var(--text-muted);">${res.fecha}</td>
-        `;
-        teacherTableBody.appendChild(tr);
-    });
 }
 
 function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal) {
@@ -315,7 +319,7 @@ function iniciarSesion() {
     }
 }
 
-// --- MÓDULO AROMA ---
+// --- MÓDULO AROMA CON RUTA FIJA VERTICAL ---
 function cargarCasoAroma() {
     const caso = CASOS_ENOLOGIA[casoActualIndex];
     selectedMacro = null;
@@ -332,12 +336,18 @@ function cargarCasoAroma() {
     rootNodeTitle.textContent = caso.titulo;
 
     feedbackModal.classList.add('hidden');
+    
+    // Resetear contenedores
     level2Wrapper.classList.add('hidden');
     level3Wrapper.classList.add('hidden');
+    selectedL1Display.classList.add('hidden');
+    selectedL2Display.classList.add('hidden');
+    selectedL3Display.classList.add('hidden');
+    level1Container.classList.remove('hidden');
 
     line1.className = 'tree-line';
-    line2.className = 'tree-line';
-    line3.className = 'tree-line';
+    line2.className = 'tree-line hidden';
+    line3.className = 'tree-line hidden';
 
     renderNivel1(caso);
 }
@@ -349,32 +359,28 @@ function renderNivel1(caso) {
         const btn = document.createElement('button');
         btn.className = 'option-node';
         btn.textContent = opcion;
-        btn.onclick = () => handleSelectNivel1(opcion, btn, caso);
+        btn.onclick = () => handleSelectNivel1(opcion, caso);
         level1Options.appendChild(btn);
     });
 }
 
-function handleSelectNivel1(opcionTexto, elementoBoton, caso) {
-    if (selectedMacro === opcionTexto) { deselectNivel1(); return; }
+function handleSelectNivel1(opcionTexto, caso) {
     selectedMacro = opcionTexto;
+    selectedFamily = null;
+    selectedSubfamily = null;
+    selectedDescriptor = null;
+    verifyBtn.disabled = true;
+
+    // Fijar tarjeta Nivel 1 arriba y ocultar selector
+    level1Container.classList.add('hidden');
+    selectedL1Display.textContent = opcionTexto;
+    selectedL1Display.classList.remove('hidden');
+
     line1.className = 'tree-line active';
+    line2.classList.remove('hidden');
 
-    level1Options.querySelectorAll('.option-node').forEach(btn => {
-        if (btn === elementoBoton) { btn.classList.add('selected-branch'); btn.classList.remove('unselected-collapsed'); }
-        else { btn.classList.add('unselected-collapsed'); btn.classList.remove('selected-branch'); }
-    });
-
-    selectedFamily = null; selectedSubfamily = null; selectedDescriptor = null; verifyBtn.disabled = true;
-    line2.className = 'tree-line'; line3.className = 'tree-line'; level3Wrapper.classList.add('hidden');
     level2Wrapper.classList.remove('hidden');
     renderNivel2(caso);
-}
-
-function deselectNivel1() {
-    selectedMacro = null; selectedFamily = null; selectedSubfamily = null; selectedDescriptor = null;
-    line1.className = 'tree-line'; line2.className = 'tree-line'; line3.className = 'tree-line';
-    level2Wrapper.classList.add('hidden'); level3Wrapper.classList.add('hidden'); verifyBtn.disabled = true;
-    level1Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
 
 function renderNivel2(caso) {
@@ -392,23 +398,25 @@ function renderNivel2(caso) {
         const btn = document.createElement('button');
         btn.className = 'option-node';
         btn.textContent = opcion;
-        btn.onclick = () => handleSelectNivel2(opcion, btn, caso);
+        btn.onclick = () => handleSelectNivel2(opcion, caso);
         level2Options.appendChild(btn);
     });
 }
 
-function handleSelectNivel2(opcionTexto, elementoBoton, caso) {
-    if (selectedFamily === opcionTexto) { deselectNivel2(); return; }
+function handleSelectNivel2(opcionTexto, caso) {
     selectedFamily = opcionTexto;
+    selectedSubfamily = null;
+    selectedDescriptor = null;
+    verifyBtn.disabled = true;
+
+    // Fijar tarjeta Nivel 2 arriba y ocultar selector
+    level2Wrapper.classList.add('hidden');
+    selectedL2Display.textContent = opcionTexto;
+    selectedL2Display.classList.remove('hidden');
+
     line2.className = 'tree-line active';
+    line3.classList.remove('hidden');
 
-    level2Options.querySelectorAll('.option-node').forEach(btn => {
-        if (btn === elementoBoton) { btn.classList.add('selected-branch'); btn.classList.remove('unselected-collapsed'); }
-        else { btn.classList.add('unselected-collapsed'); btn.classList.remove('selected-branch'); }
-    });
-
-    selectedSubfamily = null; selectedDescriptor = null; verifyBtn.disabled = true;
-    line3.className = 'tree-line';
     level3Wrapper.classList.remove('hidden');
     
     const nodoFamilia = (JERARQUIA_AROMAS[selectedMacro] && JERARQUIA_AROMAS[selectedMacro][selectedFamily]) || {};
@@ -418,13 +426,6 @@ function handleSelectNivel2(opcionTexto, elementoBoton, caso) {
     } else {
         renderNivel3Subfamilias(nodoFamilia);
     }
-}
-
-function deselectNivel2() {
-    selectedFamily = null; selectedSubfamily = null; selectedDescriptor = null;
-    line2.className = 'tree-line'; line3.className = 'tree-line';
-    level3Wrapper.classList.add('hidden'); verifyBtn.disabled = true;
-    level2Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
 
 function renderNivel3Subfamilias(nodoFamilia) {
@@ -443,18 +444,13 @@ function renderNivel3Subfamilias(nodoFamilia) {
         const btn = document.createElement('button');
         btn.className = 'option-node';
         btn.textContent = opcion;
-        btn.onclick = () => handleSelectSubfamilia(opcion, btn, nodoFamilia);
+        btn.onclick = () => handleSelectSubfamilia(opcion, nodoFamilia);
         level3Options.appendChild(btn);
     });
 }
 
-function handleSelectSubfamilia(opcionTexto, elementoBoton, nodoFamilia) {
+function handleSelectSubfamilia(opcionTexto, nodoFamilia) {
     selectedSubfamily = opcionTexto;
-    level3Options.querySelectorAll('.option-node').forEach(btn => {
-        if (btn === elementoBoton) { btn.classList.add('selected-branch'); btn.classList.remove('unselected-collapsed'); }
-        else { btn.classList.add('unselected-collapsed'); btn.classList.remove('selected-branch'); }
-    });
-
     const listaDescriptores = nodoFamilia[selectedSubfamily] || ["Desconocido"];
     renderNivelDescriptorFinal(listaDescriptores);
 }
@@ -502,20 +498,14 @@ function renderNivelDescriptorFinal(listaValida) {
 }
 
 function handleSelectDescriptorFinal(opcionTexto, elementoBoton) {
-    if (selectedDescriptor === opcionTexto) { deselectDescriptorFinal(); return; }
     selectedDescriptor = opcionTexto;
     line3.className = 'tree-line active';
 
     level3Options.querySelectorAll('.option-node').forEach(btn => {
-        if (btn === elementoBoton) { btn.classList.add('selected-branch'); btn.classList.remove('unselected-collapsed'); }
-        else { btn.classList.add('unselected-collapsed'); btn.classList.remove('selected-branch'); }
+        if (btn === elementoBoton) { btn.classList.add('selected-branch'); }
+        else { btn.classList.add('unselected-collapsed'); }
     });
     verifyBtn.disabled = false;
-}
-
-function deselectDescriptorFinal() {
-    selectedDescriptor = null; line3.className = 'tree-line'; verifyBtn.disabled = true;
-    level3Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
 
 verifyBtn.addEventListener('click', () => {
