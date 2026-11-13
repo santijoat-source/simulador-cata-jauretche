@@ -1,19 +1,47 @@
+// Estructura jerárquica secuencial estricta según Rueda de Aromas Ultimate (v2)
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
-        "Frutas de Vino Blanco": ["Limón", "Lima", "Pomelo", "Mandarina", "Grosella espinosa", "Pera", "Manzana", "Manzana verde", "Durazno", "Melón", "Guayaba", "Piña", "Maracuyá", "Lichi", "Plátano", "Albaricoque seco", "Cáscara de naranja"],
-        "Frutas de Vino Tinto": ["Grosella", "Grosella negra", "Frutilla", "Mora", "Frambuesa", "Cereza", "Ciruela", "Pasa"],
-        "Floral": ["Madreselva", "Majuelo", "Flor de naranja", "Tilo", "Jazmín", "Acacia", "Rosa", "Lavanda", "Violeta"],
-        "Vegetal": ["Pimiento", "Tomate", "Hinojo", "Pasto cortado", "Eneldo", "Tomillo", "Menta", "Helecho", "Heno", "Tabaco", "Té negro", "Hoja de laurel", "Eucalipto", "Hoja de grosella negra"],
-        "Mineral": ["Sílex", "Queroseno", "Yodo"]
+        "Frutas de Vino Blanco": {
+            "Cítricos": ["Limón", "Lima", "Pomelo", "Mandarina"],
+            "Bayas Blancas": ["Grosella espinosa"],
+            "Frutas de Pepita": ["Pera", "Manzana", "Manzana verde"],
+            "Frutas de Hueso": ["Durazno"],
+            "Frutas Tropicales": ["Melón", "Guayaba", "Piña", "Maracuyá", "Lichi", "Plátano"],
+            "Botritizadas": ["Albaricoque seco", "Cáscara de naranja"]
+        },
+        "Frutas de Vino Tinto": {
+            "Bayas Rojas": ["Grosella", "Grosella negra", "Frutilla", "Mora", "Frambuesa"],
+            "Frutas de Hueso - Tintos": ["Cereza", "Ciruela"],
+            "Fortificado": ["Pasa"]
+        },
+        "Floral": {
+            "Flores Blancas": ["Madreselva", "Majuelo", "Flor de naranja", "Tilo", "Jazmín", "Acacia"],
+            "Flores de Colores": ["Rosa", "Lavanda", "Violeta"]
+        },
+        "Vegetal": {
+            "Verduras": ["Pimiento", "Tomate", "Hinojo"],
+            "Hierbas Frescas": ["Pasto cortado", "Eneldo", "Tomillo", "Menta", "Helecho"],
+            "Hierbas Secas": ["Heno", "Tabaco", "Té negro"],
+            "Hojas": ["Hoja de laurel", "Eucalipto", "Hoja de grosella negra"]
+        },
+        "Mineral": ["Sílex", "Queroseno", "Yodo"] // Salto directo Opción 3 (sin subfamilia)
     },
     "Aromas Secundarios": {
         "Levaduras": ["Pan"],
         "Fermentación Malo-Láctica": ["Mantequilla", "Yogur"]
     },
     "Aromas Terciarios": {
-        "Crianza en Barrica de Roble": ["Pino", "Cedro", "Sándalo", "Roble", "Almendra", "Avellana", "Coco", "Clavel", "Nuez moscada", "Regaliz", "Canela", "Pimienta", "Vainilla", "Alquitrán", "Humo", "Tocino", "Café", "Tostada", "Chocolate", "Caramelo"],
+        "Crianza en Barrica de Roble": {
+            "Maderas": ["Pino", "Cedro", "Sándalo", "Roble"],
+            "Nueces": ["Almendra", "Avellana", "Coco"],
+            "Especias": ["Clavel", "Nuez moscada", "Regaliz", "Canela", "Pimienta", "Vainilla"],
+            "Tostados": ["Alquitrán", "Humo", "Tocino", "Café", "Tostada", "Chocolate", "Caramelo"]
+        },
         "Vino Blanco Añejo": ["Miel", "Membrillo"],
-        "Vino Tinto Añejo": ["Musgo de Árbol", "Trufa", "Seta", "Cuero", "Almizcle", "Salsa de carne"]
+        "Vino Tinto Añejo": {
+            "Matorral": ["Musgo de Árbol", "Trufa", "Seta"],
+            "Animal": ["Cuero", "Almizcle", "Salsa de carne"]
+        }
     },
     "Defectos": {
         "Enfermedad del Corcho": ["Sabor al corcho - TCA"],
@@ -29,9 +57,10 @@ let score = 0;
 let currentMode = 'aroma';
 let casoActualIndex = 0;
 
-let selectedMacro = null;
-let selectedFamily = null;
-let selectedDescriptor = null;
+let selectedMacro = null;     // Opción 1
+let selectedFamily = null;    // Opción 2
+let selectedSubfamily = null; // Opción 3 (si aplica)
+let selectedDescriptor = null;// Opción final
 
 let selectedCapa = null;
 let selectedTono = null;
@@ -66,6 +95,7 @@ const rootNodeTitle = document.getElementById('root-node-title');
 const line1 = document.getElementById('line-1');
 const line2 = document.getElementById('line-2');
 const line3 = document.getElementById('line-3');
+const line4 = document.getElementById('line-4'); // Por si se requiere en 4 niveles
 
 const level1Options = document.getElementById('level-1-options');
 const level2Wrapper = document.getElementById('level-2-wrapper');
@@ -142,7 +172,6 @@ function ocultarTodasLasPantallas() {
 }
 
 function configurarNavegacion() {
-    // Paso 1 -> Paso 2 (Jugar -> Mostrar Modos en Grande)
     enterModesBtn.addEventListener('click', () => {
         ocultarTodasLasPantallas();
         modesScreen.classList.remove('hidden');
@@ -150,7 +179,6 @@ function configurarNavegacion() {
         statsContainer.classList.add('hidden');
     });
 
-    // Selección de Modo
     document.querySelectorAll('.mode-clean-item').forEach(card => {
         card.addEventListener('click', () => {
             currentMode = card.getAttribute('data-mode');
@@ -158,7 +186,6 @@ function configurarNavegacion() {
         });
     });
 
-    // Volver al Inicio Heroico
     const irAlInicio = () => {
         ocultarTodasLasPantallas();
         heroScreen.classList.remove('hidden');
@@ -197,11 +224,12 @@ function iniciarSesion() {
     }
 }
 
-// --- MÓDULO AROMA ---
+// --- MÓDULO AROMA (SECUENCIAL ESTRICTO) ---
 function cargarCasoAroma() {
     const caso = CASOS_ENOLOGIA[casoActualIndex];
     selectedMacro = null;
     selectedFamily = null;
+    selectedSubfamily = null;
     selectedDescriptor = null;
     verifyBtn.disabled = true;
 
@@ -223,6 +251,7 @@ function cargarCasoAroma() {
     renderNivel1(caso);
 }
 
+// Opción 1: Clasificación General (Macro)
 function renderNivel1(caso) {
     level1Options.innerHTML = '';
     const opciones = mezclarArreglo(Object.keys(JERARQUIA_AROMAS));
@@ -245,24 +274,29 @@ function handleSelectNivel1(opcionTexto, elementoBoton, caso) {
         else { btn.classList.add('unselected-collapsed'); btn.classList.remove('selected-branch'); }
     });
 
-    selectedFamily = null; selectedDescriptor = null; verifyBtn.disabled = true;
+    selectedFamily = null; selectedSubfamily = null; selectedDescriptor = null; verifyBtn.disabled = true;
     line2.className = 'tree-line'; line3.className = 'tree-line'; level3Wrapper.classList.add('hidden');
     level2Wrapper.classList.remove('hidden');
     renderNivel2(caso);
 }
 
 function deselectNivel1() {
-    selectedMacro = null; selectedFamily = null; selectedDescriptor = null;
+    selectedMacro = null; selectedFamily = null; selectedSubfamily = null; selectedDescriptor = null;
     line1.className = 'tree-line'; line2.className = 'tree-line'; line3.className = 'tree-line';
     level2Wrapper.classList.add('hidden'); level3Wrapper.classList.add('hidden'); verifyBtn.disabled = true;
     level1Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
 
+// Opción 2: Familia Aromática
 function renderNivel2(caso) {
     level2Options.innerHTML = '';
-    const familiasValidas = Object.keys(JERARQUIA_AROMAS[selectedMacro] || {});
+    const nodoMacro = JERARQUIA_AROMAS[selectedMacro] || {};
+    const familiasValidas = Object.keys(nodoMacro);
+    
     let otrasFamilias = [];
-    for (let m in JERARQUIA_AROMAS) { if (m !== selectedMacro) otrasFamilias.push(...Object.keys(JERARQUIA_AROMAS[m])); }
+    for (let m in JERARQUIA_AROMAS) {
+        if (m !== selectedMacro) otrasFamilias.push(...Object.keys(JERARQUIA_AROMAS[m]));
+    }
     const opciones = mezclarArreglo([...familiasValidas, ...mezclarArreglo(otrasFamilias).slice(0, 2)]);
 
     opciones.forEach(opcion => {
@@ -284,40 +318,109 @@ function handleSelectNivel2(opcionTexto, elementoBoton, caso) {
         else { btn.classList.add('unselected-collapsed'); btn.classList.remove('selected-branch'); }
     });
 
-    selectedDescriptor = null; verifyBtn.disabled = true; line3.className = 'tree-line';
+    selectedSubfamily = null; selectedDescriptor = null; verifyBtn.disabled = true;
+    line3.className = 'tree-line';
     level3Wrapper.classList.remove('hidden');
-    renderNivel3(caso);
+    
+    // Verificar si esta familia tiene subfamilias o salta directo a descriptores (ej. Mineral, Defectos, etc.)
+    const nodoFamilia = (JERARQUIA_AROMAS[selectedMacro] && JERARQUIA_AROMAS[selectedMacro][selectedFamily]) || {};
+    
+    if (Array.isArray(nodoFamilia)) {
+        // Salto directo a descriptores (Opción 3/4 unificada)
+        renderNivelDirecto(nodoFamilia);
+    } else {
+        // Tiene Opción 3 (Subfamilias)
+        renderNivel3Subfamilias(nodoFamilia);
+    }
 }
 
 function deselectNivel2() {
-    selectedFamily = null; selectedDescriptor = null;
+    selectedFamily = null; selectedSubfamily = null; selectedDescriptor = null;
     line2.className = 'tree-line'; line3.className = 'tree-line';
     level3Wrapper.classList.add('hidden'); verifyBtn.disabled = true;
     level2Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
 
-function renderNivel3(caso) {
+// Opción 3: Subfamilias (si la familia tiene divisiones)
+function renderNivel3Subfamilias(nodoFamilia) {
     level3Options.innerHTML = '';
-    let descriptoresValidos = (JERARQUIA_AROMAS[selectedMacro] && JERARQUIA_AROMAS[selectedMacro][selectedFamily]) || ["Desconocido"];
-    let otrosDescriptores = [];
-    if (JERARQUIA_AROMAS[selectedMacro]) {
-        for (let f in JERARQUIA_AROMAS[selectedMacro]) {
-            if (f !== selectedFamily) otrosDescriptores.push(...JERARQUIA_AROMAS[selectedMacro][f]);
+    const subfamiliasValidas = Object.keys(nodoFamilia);
+    
+    let otrasSub = [];
+    for (let f in (JERARQUIA_AROMAS[selectedMacro] || {})) {
+        if (f !== selectedFamily && typeof JERARQUIA_AROMAS[selectedMacro][f] === 'object' && !Array.isArray(JERARQUIA_AROMAS[selectedMacro][f])) {
+            otrasSub.push(...Object.keys(JERARQUIA_AROMAS[selectedMacro][f]));
         }
     }
-    const opciones = mezclarArreglo([...descriptoresValidos, ...mezclarArreglo(otrosDescriptores).slice(0, 3)]);
+    const opciones = mezclarArreglo([...subfamiliasValidas, ...mezclarArreglo(otrasSub).slice(0, 2)]);
 
     opciones.forEach(opcion => {
         const btn = document.createElement('button');
         btn.className = 'option-node';
         btn.textContent = opcion;
-        btn.onclick = () => handleSelectNivel3(opcion, btn);
+        btn.onclick = () => handleSelectSubfamilia(opcion, btn, nodoFamilia);
         level3Options.appendChild(btn);
     });
 }
 
-function handleSelectNivel3(opcionTexto, elementoBoton) {
-    if (selectedDescriptor === opcionTexto) { deselectNivel3(); return; }
+function handleSelectSubfamilia(opcionTexto, elementoBoton, nodoFamilia) {
+    selectedSubfamily = opcionTexto;
+    level3Options.querySelectorAll('.option-node').forEach(btn => {
+        if (btn === elementoBoton) { btn.classList.add('selected-branch'); btn.classList.remove('unselected-collapsed'); }
+        else { btn.classList.add('unselected-collapsed'); btn.classList.remove('selected-branch'); }
+    });
+
+    const listaDescriptores = nodoFamilia[selectedSubfamily] || ["Desconocido"];
+    renderNivelDescriptorFinal(listaDescriptores);
+}
+
+// Salto directo o nivel final de descriptores
+function renderNivelDirecto(listaValida) {
+    level3Options.innerHTML = '';
+    let otrosDesc = [];
+    for (let f in (JERARQUIA_AROMAS[selectedMacro] || {})) {
+        if (f !== selectedFamily) {
+            let val = JERARQUIA_AROMAS[selectedMacro][f];
+            if (Array.isArray(val)) otrosDesc.push(...val);
+            else if (typeof val === 'object') {
+                for (let sub in val) otrosDesc.push(...val[sub]);
+            }
+        }
+    }
+    const opciones = mezclarArreglo([...listaValida, ...mezclarArreglo(otrosDesc).slice(0, 3)]);
+
+    opciones.forEach(opcion => {
+        const btn = document.createElement('button');
+        btn.className = 'option-node';
+        btn.textContent = opcion;
+        btn.onclick = () => handleSelectDescriptorFinal(opcion, btn);
+        level3Options.appendChild(btn);
+    });
+}
+
+function renderNivelDescriptorFinal(listaValida) {
+    // Si tuviéramos un 4to nivel visual estricto, aquí se renderiza, pero lo manejamos fluido en el nivel 3 con la misma rejilla
+    // Para simplificar y mantener la linealidad limpia vertical del PDF:
+    let otrosDesc = [];
+    for (let sub in (JERARQUIA_AROMAS[selectedMacro][selectedFamily] || {})) {
+        if (sub !== selectedSubfamily) {
+            otrosDesc.push(...JERARQUIA_AROMAS[selectedMacro][selectedFamily][sub]);
+        }
+    }
+    const opciones = mezclarArreglo([...listaValida, ...mezclarArreglo(otrosDesc).slice(0, 3)]);
+
+    level3Options.innerHTML = '';
+    opciones.forEach(opcion => {
+        const btn = document.createElement('button');
+        btn.className = 'option-node';
+        btn.textContent = opcion;
+        btn.onclick = () => handleSelectDescriptorFinal(opcion, btn);
+        level3Options.appendChild(btn);
+    });
+}
+
+function handleSelectDescriptorFinal(opcionTexto, elementoBoton) {
+    if (selectedDescriptor === opcionTexto) { deselectDescriptorFinal(); return; }
     selectedDescriptor = opcionTexto;
     line3.className = 'tree-line active';
 
@@ -328,7 +431,7 @@ function handleSelectNivel3(opcionTexto, elementoBoton) {
     verifyBtn.disabled = false;
 }
 
-function deselectNivel3() {
+function deselectDescriptorFinal() {
     selectedDescriptor = null; line3.className = 'tree-line'; verifyBtn.disabled = true;
     level3Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
