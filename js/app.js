@@ -26,7 +26,7 @@ const JERARQUIA_AROMAS = {
 };
 
 let score = 0;
-let currentMode = 'aroma'; // 'aroma', 'visual', 'examen'
+let currentMode = 'aroma';
 let casoActualIndex = 0;
 
 let selectedMacro = null;
@@ -36,13 +36,20 @@ let selectedDescriptor = null;
 let selectedCapa = null;
 let selectedTono = null;
 
-// DOM Elements
-const homeScreen = document.getElementById('home-screen');
+// Pantallas
+const heroScreen = document.getElementById('hero-screen');
+const modesScreen = document.getElementById('modes-screen');
 const gameContainer = document.getElementById('game-container');
 const visualContainer = document.getElementById('visual-container');
-const statsContainer = document.getElementById('stats-container');
+const endScreen = document.getElementById('end-screen');
+
+// Navegación
+const brandLogo = document.getElementById('brand-logo');
+const enterModesBtn = document.getElementById('enter-modes-btn');
 const homeNavBtn = document.getElementById('home-nav-btn');
 const restartMenuBtn = document.getElementById('restart-menu-btn');
+const statsContainer = document.getElementById('stats-container');
+
 const openAboutBtn = document.getElementById('open-about-btn');
 const aboutModal = document.getElementById('about-modal');
 const closeAboutBtn = document.getElementById('close-about-btn');
@@ -54,6 +61,7 @@ const themeToggleBtn = document.getElementById('theme-toggle');
 const moonIcon = document.getElementById('moon-icon');
 const sunIcon = document.getElementById('sun-icon');
 
+// Árbol DOM
 const rootNodeTitle = document.getElementById('root-node-title');
 const line1 = document.getElementById('line-1');
 const line2 = document.getElementById('line-2');
@@ -80,13 +88,13 @@ const capaOptions = document.getElementById('capa-options');
 const tonoOptions = document.getElementById('tono-options');
 const verifyVisBtn = document.getElementById('verify-vis-btn');
 
+// Feedback y Modales
 const feedbackModal = document.getElementById('feedback-modal');
 const feedbackStatus = document.getElementById('feedback-status');
 const feedbackText = document.getElementById('feedback-text');
 const feedbackExtra = document.getElementById('feedback-extra');
 const nextBtn = document.getElementById('next-btn');
 
-const endScreen = document.getElementById('end-screen');
 const finalScoreEl = document.getElementById('final-score');
 const finalRankEl = document.getElementById('final-rank');
 
@@ -96,7 +104,7 @@ const wheelModal = document.getElementById('wheel-modal');
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarTemaSVG();
-    configurarNavegacionHome();
+    configurarNavegacion();
     configurarEventosGlobales();
 });
 
@@ -124,40 +132,61 @@ function configurarTemaSVG() {
     });
 }
 
-function configurarNavegacionHome() {
-    document.querySelectorAll('.mode-card').forEach(card => {
+function ocultarTodasLasPantallas() {
+    heroScreen.classList.add('hidden');
+    modesScreen.classList.add('hidden');
+    gameContainer.classList.add('hidden');
+    visualContainer.classList.add('hidden');
+    endScreen.classList.add('hidden');
+    feedbackModal.classList.add('hidden');
+}
+
+function configurarNavegacion() {
+    // Paso 1 -> Paso 2 (Jugar -> Mostrar Modos en Grande)
+    enterModesBtn.addEventListener('click', () => {
+        ocultarTodasLasPantallas();
+        modesScreen.classList.remove('hidden');
+        homeNavBtn.classList.remove('hidden');
+        statsContainer.classList.add('hidden');
+    });
+
+    // Selección de Modo
+    document.querySelectorAll('.mode-clean-item').forEach(card => {
         card.addEventListener('click', () => {
             currentMode = card.getAttribute('data-mode');
             iniciarSesion();
         });
     });
 
-    homeNavBtn.addEventListener('click', volverAlMenu);
-    restartMenuBtn.addEventListener('click', volverAlMenu);
+    // Volver al Inicio Heroico
+    const irAlInicio = () => {
+        ocultarTodasLasPantallas();
+        heroScreen.classList.remove('hidden');
+        homeNavBtn.classList.add('hidden');
+        statsContainer.classList.add('hidden');
+        openWheelBtn.classList.remove('hidden');
+    };
 
-    printReportBtn.addEventListener('click', () => {
-        window.print();
-    });
-}
+    brandLogo.addEventListener('click', irAlInicio);
+    homeNavBtn.addEventListener('click', irAlInicio);
+    restartMenuBtn.addEventListener('click', irAlInicio);
 
-function volverAlMenu() {
-    gameContainer.classList.add('hidden');
-    visualContainer.classList.add('hidden');
-    statsContainer.classList.add('hidden');
-    homeNavBtn.classList.add('hidden');
-    endScreen.classList.add('hidden');
-    feedbackModal.classList.add('hidden');
-    homeScreen.classList.remove('hidden');
+    printReportBtn.addEventListener('click', () => window.print());
 }
 
 function iniciarSesion() {
     score = 0;
     casoActualIndex = 0;
     scoreDisplay.textContent = '0';
-    homeScreen.classList.add('hidden');
+    ocultarTodasLasPantallas();
     statsContainer.classList.remove('hidden');
     homeNavBtn.classList.remove('hidden');
-    endScreen.classList.add('hidden');
+
+    if (currentMode === 'examen') {
+        openWheelBtn.classList.add('hidden');
+    } else {
+        openWheelBtn.classList.remove('hidden');
+    }
 
     if (currentMode === 'visual') {
         visualContainer.classList.remove('hidden');
@@ -312,9 +341,9 @@ verifyBtn.addEventListener('click', () => {
     if (esExito) {
         score += 15;
         scoreDisplay.textContent = score;
-        mostrarFeedback(true, `✨ ¡Deducción perfecta!\n\n${caso.explicacion}`, caso.datoCurioso);
+        mostrarFeedback(true, `Deducción perfecta.\n\n${caso.explicacion}`, caso.datoCurioso);
     } else {
-        mostrarFeedback(false, `⚠️ Discrepancia en el análisis.\n\n• Elegiste: ${selectedMacro} > ${selectedFamily} > ${selectedDescriptor}\n• Correcto: ${caso.macroCorrecta} > ${caso.familiaCorrecta} > ${caso.descriptorCorrecto}\n\n${caso.explicacion}`, null);
+        mostrarFeedback(false, `Discrepancia en el análisis.\n\n• Elegiste: ${selectedMacro} › ${selectedFamily} › ${selectedDescriptor}\n• Correcto: ${caso.macroCorrecta} › ${caso.familiaCorrecta} › ${caso.descriptorCorrecto}\n\n${caso.explicacion}`, null);
     }
 });
 
@@ -326,6 +355,7 @@ function cargarCasoVisual() {
     visBadge.textContent = `Fase Visual #${caso.id}`;
     visTitle.textContent = caso.titulo;
     visDescription.textContent = caso.descripcion;
+    caseCounter.textContent = `${casoActualIndex + 1} / ${CASOS_VISUALES.length}`;
     wineLiquid.style.background = caso.colorHex;
 
     renderOpcionesVisuales(caso);
@@ -373,20 +403,20 @@ verifyVisBtn.addEventListener('click', () => {
     if (esExito) {
         score += 15;
         scoreDisplay.textContent = score;
-        mostrarFeedback(true, `👁️ ¡Análisis visual correcto!\n\n${caso.explicacion}`, null);
+        mostrarFeedback(true, `Análisis visual correcto.\n\n${caso.explicacion}`, null);
     } else {
-        mostrarFeedback(false, `⚠️ Error en la fase visual.\n• Correcto: ${caso.tonoCorrecto} (${caso.capaCorrecta})\n\n${caso.explicacion}`, null);
+        mostrarFeedback(false, `Discrepancia en la fase visual.\n• Correcto: ${caso.tonoCorrecto} (${caso.capaCorrecta})\n\n${caso.explicacion}`, null);
     }
 });
 
 function mostrarFeedback(esCorrecto, mensaje, datoCurioso) {
     feedbackModal.classList.remove('hidden');
-    feedbackStatus.textContent = esCorrecto ? "✨ ¡Análisis Exitoso! (+15 pts)" : "⚠️ Discrepancia Sensorial";
+    feedbackStatus.textContent = esCorrecto ? "Análisis Exitoso (+15 pts)" : "Discrepancia Sensorial";
     feedbackText.innerText = mensaje;
 
     if (esCorrecto && datoCurioso) {
         feedbackExtra.classList.remove('hidden');
-        feedbackExtra.innerHTML = `<h4>💡 Sabías que...</h4><p>${datoCurioso}</p>`;
+        feedbackExtra.innerHTML = `<h4>Dato Técnico</h4><p>${datoCurioso}</p>`;
     } else {
         feedbackExtra.classList.add('hidden');
         feedbackExtra.innerHTML = '';
@@ -405,21 +435,17 @@ nextBtn.addEventListener('click', () => {
 });
 
 function mostrarPantallaFinal() {
-    gameContainer.classList.add('hidden');
-    visualContainer.classList.add('hidden');
+    ocultarTodasLasPantallas();
     statsContainer.classList.add('hidden');
-    feedbackModal.classList.add('hidden');
+    openWheelBtn.classList.remove('hidden');
 
     finalScoreEl.textContent = score;
-    finalRankEl.textContent = score >= 120 ? "🥇 Enólogo Master" : score >= 75 ? "🥈 Sommelier Avanzado" : "🥉 Estudiante Práctica Jr.";
+    finalRankEl.textContent = score >= 120 ? "Enólogo Master" : score >= 75 ? "Sommelier Avanzado" : "Práctica Inicial";
     endScreen.classList.remove('hidden');
 }
 
 function configurarEventosGlobales() {
-    if (openWheelBtn) openWheelBtn.addEventListener('click', () => {
-        if (currentMode === 'examen') alert("⚠️ La Rueda de Aromas está deshabilitada en el Modo Examen.");
-        else wheelModal.classList.remove('hidden');
-    });
+    if (openWheelBtn) openWheelBtn.addEventListener('click', () => wheelModal.classList.remove('hidden'));
     if (closeWheelBtn) closeWheelBtn.addEventListener('click', () => wheelModal.classList.add('hidden'));
     if (openAboutBtn) openAboutBtn.addEventListener('click', () => aboutModal.classList.remove('hidden'));
     if (closeAboutBtn) closeAboutBtn.addEventListener('click', () => aboutModal.classList.add('hidden'));
