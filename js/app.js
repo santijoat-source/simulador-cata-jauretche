@@ -24,7 +24,7 @@ const JERARQUIA_AROMAS = {
             "Hierbas Secas": ["Heno", "Tabaco", "Té negro"],
             "Hojas": ["Hoja de laurel", "Eucalipto", "Hoja de grosella negra"]
         },
-        "Mineral": ["Sílex", "Queroseno", "Yodo"] // Salto directo Opción 3 (sin subfamilia)
+        "Mineral": ["Sílex", "Queroseno", "Yodo"]
     },
     "Aromas Secundarios": {
         "Levaduras": ["Pan"],
@@ -55,12 +55,13 @@ const JERARQUIA_AROMAS = {
 
 let score = 0;
 let currentMode = 'aroma';
+let currentStudentName = 'Estudiante';
 let casoActualIndex = 0;
 
-let selectedMacro = null;     // Opción 1
-let selectedFamily = null;    // Opción 2
-let selectedSubfamily = null; // Opción 3 (si aplica)
-let selectedDescriptor = null;// Opción final
+let selectedMacro = null;
+let selectedFamily = null;
+let selectedSubfamily = null;
+let selectedDescriptor = null;
 
 let selectedCapa = null;
 let selectedTono = null;
@@ -79,10 +80,22 @@ const homeNavBtn = document.getElementById('home-nav-btn');
 const restartMenuBtn = document.getElementById('restart-menu-btn');
 const statsContainer = document.getElementById('stats-container');
 
+// Modales Identificación y Docente
+const nameModal = document.getElementById('name-modal');
+const studentNameInput = document.getElementById('student-name-input');
+const startSessionBtn = document.getElementById('start-session-btn');
+const openTeacherBtn = document.getElementById('open-teacher-btn');
+const teacherModal = document.getElementById('teacher-modal');
+const closeTeacherBtn = document.getElementById('close-teacher-btn');
+const teacherTableBody = document.getElementById('teacher-table-body');
+const clearRecordsBtn = document.getElementById('clear-records-btn');
+
+const studentTagAroma = document.getElementById('student-tag-aroma');
+const studentTagVis = document.getElementById('student-tag-vis');
+
 const openAboutBtn = document.getElementById('open-about-btn');
 const aboutModal = document.getElementById('about-modal');
 const closeAboutBtn = document.getElementById('close-about-btn');
-const printReportBtn = document.getElementById('print-report-btn');
 
 const scoreDisplay = document.getElementById('score-display');
 const caseCounter = document.getElementById('case-counter');
@@ -95,7 +108,6 @@ const rootNodeTitle = document.getElementById('root-node-title');
 const line1 = document.getElementById('line-1');
 const line2 = document.getElementById('line-2');
 const line3 = document.getElementById('line-3');
-const line4 = document.getElementById('line-4'); // Por si se requiere en 4 niveles
 
 const level1Options = document.getElementById('level-1-options');
 const level2Wrapper = document.getElementById('level-2-wrapper');
@@ -132,9 +144,12 @@ const openWheelBtn = document.getElementById('open-wheel-btn');
 const closeWheelBtn = document.getElementById('close-wheel-btn');
 const wheelModal = document.getElementById('wheel-modal');
 
+let pendingMode = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     configurarTemaSVG();
     configurarNavegacion();
+    configurarPanelDocente();
     configurarEventosGlobales();
 });
 
@@ -169,6 +184,7 @@ function ocultarTodasLasPantallas() {
     visualContainer.classList.add('hidden');
     endScreen.classList.add('hidden');
     feedbackModal.classList.add('hidden');
+    nameModal.classList.add('hidden');
 }
 
 function configurarNavegacion() {
@@ -181,9 +197,26 @@ function configurarNavegacion() {
 
     document.querySelectorAll('.mode-clean-item').forEach(card => {
         card.addEventListener('click', () => {
-            currentMode = card.getAttribute('data-mode');
-            iniciarSesion();
+            pendingMode = card.getAttribute('data-mode');
+            nameModal.classList.remove('hidden');
+            studentNameInput.focus();
         });
+    });
+
+    startSessionBtn.addEventListener('click', () => {
+        const nombreVal = studentNameInput.value.trim();
+        if (!nombreVal) {
+            alert("Por favor, ingresa tu Nombre y Apellido para continuar.");
+            return;
+        }
+        currentStudentName = nombreVal;
+        currentMode = pendingMode;
+        nameModal.classList.add('hidden');
+        iniciarSesion();
+    });
+
+    studentNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') startSessionBtn.click();
     });
 
     const irAlInicio = () => {
@@ -197,8 +230,62 @@ function configurarNavegacion() {
     brandLogo.addEventListener('click', irAlInicio);
     homeNavBtn.addEventListener('click', irAlInicio);
     restartMenuBtn.addEventListener('click', irAlInicio);
+}
 
-    printReportBtn.addEventListener('click', () => window.print());
+function configurarPanelDocente() {
+    openTeacherBtn.addEventListener('click', () => {
+        const pin = prompt("🔒 Acceso Restringido. Ingrese el PIN docente:");
+        if (pin === "enologia2026") {
+            renderizarTablaDocente();
+            teacherModal.classList.remove('hidden');
+        } else if (pin !== null) {
+            alert("❌ PIN incorrecto.");
+        }
+    });
+
+    closeTeacherBtn.addEventListener('click', () => teacherModal.classList.add('hidden'));
+
+    clearRecordsBtn.addEventListener('click', () => {
+        if (confirm("¿Estás segura de borrar todos los registros de estudiantes almacenados?")) {
+            localStorage.removeItem('cata_resultados_estudiantes');
+            renderizarTablaDocente();
+        }
+    });
+}
+
+function renderizarTablaDocente() {
+    teacherTableBody.innerHTML = '';
+    const resultados = JSON.parse(localStorage.getItem('cata_resultados_estudiantes') || '[]');
+
+    if (resultados.length === 0) {
+        teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No hay registros de alumnos todavía.</td></tr>`;
+        return;
+    }
+
+    resultados.reverse().forEach(res => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${res.estudiante}</strong></td>
+            <td><span class="pill-tag" style="font-size: 0.65rem; padding: 4px 10px;">${res.modalidad}</span></td>
+            <td><strong>${res.puntaje} pts</strong></td>
+            <td>${res.rango}</td>
+            <td style="font-size: 0.82rem; color: var(--text-muted);">${res.fecha}</td>
+        `;
+        teacherTableBody.appendChild(tr);
+    });
+}
+
+function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal) {
+    const resultados = JSON.parse(localStorage.getItem('cata_resultados_estudiantes') || '[]');
+    const nuevoRegistro = {
+        estudiante: currentStudentName,
+        modalidad: modalidadNombre,
+        puntaje: puntajeFinal,
+        rango: rangoFinal,
+        fecha: new Date().toLocaleString()
+    };
+    resultados.push(nuevoRegistro);
+    localStorage.setItem('cata_resultados_estudiantes', JSON.stringify(resultados));
 }
 
 function iniciarSesion() {
@@ -211,8 +298,12 @@ function iniciarSesion() {
 
     if (currentMode === 'examen') {
         openWheelBtn.classList.add('hidden');
+        studentTagAroma.textContent = `Estudiante: ${currentStudentName} (Examen)`;
+        studentTagVis.textContent = `Estudiante: ${currentStudentName} (Examen)`;
     } else {
         openWheelBtn.classList.remove('hidden');
+        studentTagAroma.textContent = `Estudiante: ${currentStudentName}`;
+        studentTagVis.textContent = `Estudiante: ${currentStudentName}`;
     }
 
     if (currentMode === 'visual') {
@@ -224,7 +315,7 @@ function iniciarSesion() {
     }
 }
 
-// --- MÓDULO AROMA (SECUENCIAL ESTRICTO) ---
+// --- MÓDULO AROMA ---
 function cargarCasoAroma() {
     const caso = CASOS_ENOLOGIA[casoActualIndex];
     selectedMacro = null;
@@ -251,7 +342,6 @@ function cargarCasoAroma() {
     renderNivel1(caso);
 }
 
-// Opción 1: Clasificación General (Macro)
 function renderNivel1(caso) {
     level1Options.innerHTML = '';
     const opciones = mezclarArreglo(Object.keys(JERARQUIA_AROMAS));
@@ -287,7 +377,6 @@ function deselectNivel1() {
     level1Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
 
-// Opción 2: Familia Aromática
 function renderNivel2(caso) {
     level2Options.innerHTML = '';
     const nodoMacro = JERARQUIA_AROMAS[selectedMacro] || {};
@@ -322,14 +411,11 @@ function handleSelectNivel2(opcionTexto, elementoBoton, caso) {
     line3.className = 'tree-line';
     level3Wrapper.classList.remove('hidden');
     
-    // Verificar si esta familia tiene subfamilias o salta directo a descriptores (ej. Mineral, Defectos, etc.)
     const nodoFamilia = (JERARQUIA_AROMAS[selectedMacro] && JERARQUIA_AROMAS[selectedMacro][selectedFamily]) || {};
     
     if (Array.isArray(nodoFamilia)) {
-        // Salto directo a descriptores (Opción 3/4 unificada)
         renderNivelDirecto(nodoFamilia);
     } else {
-        // Tiene Opción 3 (Subfamilias)
         renderNivel3Subfamilias(nodoFamilia);
     }
 }
@@ -341,7 +427,6 @@ function deselectNivel2() {
     level2Options.querySelectorAll('.option-node').forEach(btn => btn.classList.remove('selected-branch', 'unselected-collapsed'));
 }
 
-// Opción 3: Subfamilias (si la familia tiene divisiones)
 function renderNivel3Subfamilias(nodoFamilia) {
     level3Options.innerHTML = '';
     const subfamiliasValidas = Object.keys(nodoFamilia);
@@ -374,7 +459,6 @@ function handleSelectSubfamilia(opcionTexto, elementoBoton, nodoFamilia) {
     renderNivelDescriptorFinal(listaDescriptores);
 }
 
-// Salto directo o nivel final de descriptores
 function renderNivelDirecto(listaValida) {
     level3Options.innerHTML = '';
     let otrosDesc = [];
@@ -399,8 +483,6 @@ function renderNivelDirecto(listaValida) {
 }
 
 function renderNivelDescriptorFinal(listaValida) {
-    // Si tuviéramos un 4to nivel visual estricto, aquí se renderiza, pero lo manejamos fluido en el nivel 3 con la misma rejilla
-    // Para simplificar y mantener la linealidad limpia vertical del PDF:
     let otrosDesc = [];
     for (let sub in (JERARQUIA_AROMAS[selectedMacro][selectedFamily] || {})) {
         if (sub !== selectedSubfamily) {
@@ -542,8 +624,13 @@ function mostrarPantallaFinal() {
     statsContainer.classList.add('hidden');
     openWheelBtn.classList.remove('hidden');
 
+    const rangoFinal = score >= 120 ? "Enólogo Master" : score >= 75 ? "Sommelier Avanzado" : "Práctica Inicial";
+    const modalidadNombre = currentMode === 'visual' ? 'Fase Visual' : currentMode === 'examen' ? 'Modo Examen' : 'Árbol Olfativo';
+
+    guardarResultadoEstudiante(modalidadNombre, score, rangoFinal);
+
     finalScoreEl.textContent = score;
-    finalRankEl.textContent = score >= 120 ? "Enólogo Master" : score >= 75 ? "Sommelier Avanzado" : "Práctica Inicial";
+    finalRankEl.textContent = rangoFinal;
     endScreen.classList.remove('hidden');
 }
 

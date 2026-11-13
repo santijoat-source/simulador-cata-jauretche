@@ -11,7 +11,7 @@
     --accent-pink: #854F6C;
     --highlight: #DFB6B2;
     --text-main: #FBE4DB;
-    --text-muted: rgba(223, 182, 178, 0.78);
+    --text-muted: rgba(223, 182, 178, 0.82);
     --btn-primary-bg: #FBE4DB;
     --btn-primary-text: #190019;
     
@@ -29,7 +29,7 @@
     --accent-pink: #854F6C;
     --highlight: #522B5B;
     --text-main: #190019;
-    --text-muted: rgba(43, 18, 76, 0.8);
+    --text-muted: rgba(43, 18, 76, 0.82);
     --btn-primary-bg: #2B124C;
     --btn-primary-text: #FBE4DB;
 }
@@ -41,7 +41,7 @@
 }
 
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-main);
     background-image: radial-gradient(circle at 50% 0%, rgba(82, 43, 91, 0.28) 0%, transparent 70%);
     color: var(--text-main);
@@ -49,6 +49,7 @@ body {
     display: flex;
     flex-direction: column;
     transition: background-color 0.35s ease, color 0.35s ease;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* NAVEGACIÓN SUPERIOR */
@@ -75,7 +76,7 @@ body {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
@@ -83,9 +84,9 @@ body {
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
     cursor: pointer;
     padding: 6px 10px;
     transition: color 0.2s ease;
@@ -93,6 +94,11 @@ body {
 
 .nav-link-btn:hover {
     color: var(--text-main);
+}
+
+.teacher-nav-link {
+    color: var(--highlight) !important;
+    font-weight: 700;
 }
 
 .theme-btn {
@@ -341,7 +347,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* ÁREA DE JUEGO & ENCABEZADOS DE MUESTRA AGRANDADOS */
+/* ÁREA DE JUEGO & TIPOGRAFÍA ELEGANTE DEL ESQUEMA */
 .sample-clean-header {
     max-width: 800px;
     display: flex;
@@ -358,6 +364,16 @@ body {
     justify-content: center;
 }
 
+.student-session-badge {
+    font-size: 0.82rem;
+    color: var(--highlight);
+    font-weight: 600;
+    background: rgba(223, 182, 178, 0.1);
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+}
+
 .perception-subtle {
     font-size: 0.9rem;
     color: var(--text-muted);
@@ -369,6 +385,7 @@ body {
     font-weight: 800;
     color: var(--text-main);
     margin-top: 4px;
+    letter-spacing: -0.5px;
 }
 
 .sample-desc-clean {
@@ -394,13 +411,14 @@ body {
 }
 
 .tree-instruction {
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     color: var(--text-muted);
     margin-bottom: 24px;
+    font-weight: 400;
 }
 
 /* ==========================================
-   ÁRBOL: CARTELES AMPLIADOS (340px) Y FUENTES GRANDES
+   ÁRBOL: CARTELES AMPLIADOS (340px) Y FUENTES FLUIDAS Y AMIGABLES
    ========================================== */
 .tree-canvas {
     display: flex;
@@ -421,12 +439,13 @@ body {
     background: var(--bg-element);
     border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-node);
-    padding: 16px 24px; /* Mayor altura y padding */
+    padding: 16px 24px;
     color: var(--text-main);
-    font-size: 1.05rem; /* Fuente significativamente más grande */
+    font-size: 1.08rem; /* Tipografía fluida, legible y con cuerpo */
     font-weight: 600;
+    letter-spacing: 0.2px;
     text-align: center;
-    width: 340px; /* Ancho ampliado para PC y tablets */
+    width: 340px;
     min-width: 340px;
     max-width: 340px;
     margin: 0 auto;
@@ -436,8 +455,8 @@ body {
     flex-direction: column;
     gap: 4px;
     cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .node-tag {
@@ -478,7 +497,7 @@ body {
 }
 
 .level-label {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: var(--text-muted);
@@ -556,6 +575,50 @@ body {
     width: 100%;
     height: 65%;
     transition: background 0.4s ease;
+}
+
+/* INPUT DE ESTUDIANTE */
+.student-input-field {
+    width: 100%;
+    background: var(--bg-main);
+    border: 1.5px solid var(--border-active);
+    padding: 14px 18px;
+    border-radius: 16px;
+    color: var(--text-main);
+    font-size: 1.05rem;
+    text-align: center;
+    outline: none;
+    margin: 10px 0;
+}
+
+.student-input-field:focus {
+    box-shadow: 0 0 15px rgba(223, 182, 178, 0.25);
+}
+
+/* TABLA PANEL DOCENTE */
+.teacher-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.92rem;
+}
+
+.teacher-results-table th,
+.teacher-results-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.teacher-results-table th {
+    color: var(--highlight);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.teacher-results-table td {
+    color: var(--text-main);
 }
 
 /* RESULTADOS FINALES */
