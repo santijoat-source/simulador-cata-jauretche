@@ -1,3 +1,4 @@
+// Estructura jerárquica estrictamente limpia según la Rueda Ultimate
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
         "Frutas de Vino Blanco": ["Limón", "Lima", "Pomelo", "Mandarina", "Grosella espinosa", "Pera", "Manzana", "Manzana verde", "Durazno", "Melón", "Guayaba", "Piña", "Maracuyá", "Lichi", "Plátano", "Albaricoque seco", "Cáscara de naranja"],
@@ -329,7 +330,7 @@ function deselectNivel3() {
     });
 }
 
-// VERIFICACIÓN FINAL CON FEEDBACK Y DATOS CURIOSOS
+// VERIFICACIÓN FINAL
 verifyBtn.addEventListener('click', () => {
     if (!selectedMacro || !selectedFamily || !selectedDescriptor) return;
 
@@ -348,7 +349,7 @@ verifyBtn.addEventListener('click', () => {
     } else {
         let detallesError = [];
         if (!esMacroCorrecto) detallesError.push(`• General: Elegiste '${selectedMacro}' (Correcto: '${caso.macroCorrecta}')`);
-        if (!esFamiliaCorrecta) detallesError.push(`• Familia: Elegiste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
+        if (!esFamiliaCorrecto) detallesError.push(`• Familia: Elegiste '${selectedFamily}' (Correcto: '${caso.familiaCorrecta}')`);
         if (!esDescriptorCorrecto) detallesError.push(`• Descriptor: Elegiste '${selectedDescriptor}' (Correcto: '${caso.descriptorCorrecto}')`);
 
         mostrarFeedback(false, `Tu deducción presentó discrepancias:\n\n${detallesError.join('\n')}\n\nExplicación técnica:\n${caso.explicacion}`, null);

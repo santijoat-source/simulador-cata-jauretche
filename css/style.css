@@ -150,9 +150,9 @@ body {
 .sample-info p { color: var(--text-muted); line-height: 1.5; opacity: 0.9; }
 
 /* ==========================================
-   ESQUEMA EN ÁRBOL COMPACTO Y CENTRADO
+   ESQUEMA EN ÁRBOL COMPACTO Y ALINEADO
    ========================================== */
-.tree-header { margin-bottom: 16px; text-align: center; }
+.tree-header { margin-bottom: 14px; text-align: center; }
 .tree-header h3 { font-size: 1.2rem; margin-bottom: 4px; color: var(--text-main); }
 .tree-instruction { font-size: 0.85rem; color: var(--text-muted); }
 
@@ -160,10 +160,15 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px; /* Reducción drástica de separación vertical */
+    width: 100%;
 }
 
-.root-node-wrapper { display: flex; justify-content: center; width: 100%; }
+.root-node-wrapper { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    width: 100%; 
+}
 
 .tree-node {
     background: var(--bg-element);
@@ -183,7 +188,6 @@ body {
     align-items: center; 
     justify-content: center; 
     gap: 2px;
-    transition: all 0.3s ease;
 }
 
 .node-tag { font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); }
@@ -194,12 +198,12 @@ body {
     box-shadow: 0 0 14px rgba(223, 182, 178, 0.2);
 }
 
-/* LÍNEAS CONECTORAS MÁS CORTAS Y COMPACTAS */
+/* LÍNEAS CONECTORAS CENTRADAS */
 .tree-line {
     width: 3px;
-    height: 18px; /* Altura reducida para que quede todo bien junto */
+    height: 16px;
     background: var(--border-color);
-    margin: 0 auto;
+    margin: 4px auto;
     opacity: 0.5;
     transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
@@ -210,13 +214,15 @@ body {
     opacity: 1;
 }
 
+/* CONTENEDOR DE NIVEL: FORZAR CENTRADO ABSOLUTO */
 .tree-level-container {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    transition: all 0.3s ease;
+    justify-content: center;
+    text-align: center;
+    gap: 3px;
 }
 
 .level-label {
@@ -224,6 +230,8 @@ body {
     text-transform: uppercase;
     color: var(--text-muted);
     letter-spacing: 0.8px;
+    text-align: center;
+    width: 100%;
 }
 
 .options-branch-grid {
@@ -235,7 +243,7 @@ body {
     width: 100%;
 }
 
-/* CASILLAS Y OPCIONES */
+/* CASILLAS Y OPCIONES CON ANCHO FIJO Y SIN DESVIOS */
 .option-node {
     background: var(--bg-element);
     border: 2px solid var(--border-color);
@@ -276,6 +284,7 @@ body {
     transform: scale(1.02);
 }
 
+/* COLAPSO PERFECTO SIN ESPACIOS FANTASMA */
 .option-node.unselected-collapsed {
     opacity: 0;
     transform: scale(0.4);
@@ -290,10 +299,10 @@ body {
 }
 
 /* BOTÓN DE VERIFICACIÓN */
-.confirm-bar { margin-top: 20px; display: flex; justify-content: center; }
+.confirm-bar { margin-top: 18px; display: flex; justify-content: center; width: 100%; }
 
 .confirm-btn {
-    width: 100%; max-width: 280px; padding: 14px 24px; font-size: 1rem;
+    width: 280px; max-width: 280px; padding: 14px 20px; font-size: 1rem;
     background: var(--bg-element);
     border: 1px solid var(--border-color);
     color: var(--text-main);
