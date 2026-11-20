@@ -8,7 +8,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Vegetal",
         descriptorCorrecto: "Pimiento",
         explicacion: "El pimiento verde (debido a metoxipirrazinas) es una nota característica y primaria en variedades como Cabernet Sauvignon.",
-        datoCurioso: "🍇 **Dato Enológico Mendoza:** En regiones de Luján de Cuyo y Valle de Uco, este perfil herbal se expresa con notable elegancia."
+        datoCurioso: "🍇 Dato Enológico Mendoza: En regiones de Luján de Cuyo y Valle de Uco, este perfil herbal se expresa con notable elegancia."
     },
     {
         id: 2,
@@ -19,7 +19,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Frutas de Vino Blanco",
         descriptorCorrecto: "Limón",
         explicacion: "Los aromas cítricos como el limón son marcadores primarios frescos típicos de Chardonnays jóvenes sin paso por madera.",
-        datoCurioso: "🍋 **Dato Enológico Mendoza:** El Chardonnay cultivado en altura desarrolla una acidez natural vibrante y notas cítricas marcadas."
+        datoCurioso: "🍋 Dato Enológico Mendoza: El Chardonnay cultivado en altura desarrolla una acidez natural vibrante y notas cítricas marcadas."
     },
     {
         id: 3,
@@ -30,7 +30,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Crianza en Barrica de Roble",
         descriptorCorrecto: "Vainilla",
         explicacion: "La vainilla es un compuesto aromático (vainillina) aportado por la madera de roble durante la crianza en barrica.",
-        datoCurioso: "🪵 **Dato Enológico Mendoza:** El uso moderado de roble aporta complejidad sin enmascarar la delicada fruta roja."
+        datoCurioso: "🪵 Dato Enológico Mendoza: El uso moderado de roble aporta complejidad sin enmascarar la delicada fruta roja."
     },
     {
         id: 4,
@@ -41,7 +41,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Enfermedad del Corcho",
         descriptorCorrecto: "Sabor al corcho - TCA",
         explicacion: "El Tricloroanisol (TCA) contamina el corcho natural, generando un defecto inconfundible de humedad y cartón mojado.",
-        datoCurioso: "⚠️ **Dato Enológico:** Hoy en día se implementan tapas a rosca o corchos tecnológicos para evitar este molesto defecto."
+        datoCurioso: "⚠️ Dato Enológico: Hoy en día se implementan tapas a rosca o corchos tecnológicos para evitar este molesto defecto."
     },
     {
         id: 5,
@@ -52,7 +52,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Frutas de Vino Tinto",
         descriptorCorrecto: "Ciruela",
         explicacion: "La ciruela madura es el descriptor frutal por excelencia de los vinos Malbec de alta expresión.",
-        datoCurioso: "🍷 **Dato Enológico Mendoza:** Su cuna histórica se encuentra en Luján de Cuyo, donde expresa notas únicas de ciruelas y terciopelo."
+        datoCurioso: "🍷 Dato Enológico Mendoza: Su cuna histórica se encuentra en Luján de Cuyo, donde expresa notas únicas de ciruelas y terciopelo."
     },
     {
         id: 6,
@@ -63,7 +63,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Floral",
         descriptorCorrecto: "Jazmín",
         explicacion: "El Torrontés es una variedad aromática rica en terpenos, destacando notas florales inconfundibles como jazmín y azahar.",
-        datoCurioso: "🌸 **Dato Enológico:** Es la uva blanca emblemática de Argentina, seca y refrescante en boca a pesar de su gran perfume."
+        datoCurioso: "🌸 Dato Enológico: Es la uva blanca emblemática de Argentina, seca y refrescante en boca a pesar de su gran perfume."
     },
     {
         id: 7,
@@ -74,7 +74,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Frutas de Vino Tinto",
         descriptorCorrecto: "Mora",
         explicacion: "La mora y los frutos negros maduros son descriptores primarios fundamentales del Syrah cultivado en zonas soleadas.",
-        datoCurioso: "🌿 **Dato Enológico:** El Syrah complementa su perfil con notas de pimienta negra aportadas por la rotundona."
+        datoCurioso: "🌿 Dato Enológico: El Syrah complementa su perfil con notas de pimienta negra aportadas por la rotundona."
     },
     {
         id: 8,
@@ -85,7 +85,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Oxidado",
         descriptorCorrecto: "Jerez",
         explicacion: "La exposición excesiva al oxígeno degrada los aromas frutales frescos y genera notas avainadas típicas de Jerez.",
-        datoCurioso: "🧪 **Dato Enológico:** Ocurre por fallas en el sellado o falta de protección adecuada con anhídrido sulfuroso."
+        datoCurioso: "🧪 Dato Enológico: Ocurre por fallas en el sellado o falta de protección adecuada con anhídrido sulfuroso."
     },
     {
         id: 9,
@@ -96,7 +96,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Vegetal",
         descriptorCorrecto: "Pasto cortado",
         explicacion: "Los tioles volátiles otorgan al Sauvignon Blanc ese perfil herbáceo tan fresco de pasto cortado y hoja de higuera.",
-        datoCurioso: "🌱 **Dato Enológico:** Exige un manejo preciso del follaje en el viñedo para concentrar sus aromas típicos de altura."
+        datoCurioso: "🌱 Dato Enológico: Exige un manejo preciso del follaje en el viñedo para concentrar sus aromas típicos de altura."
     },
     {
         id: 10,
@@ -107,7 +107,7 @@ const CASOS_ENOLOGIA = [
         familiaCorrecta: "Crianza en Barrica de Roble",
         descriptorCorrecto: "Pimienta",
         explicacion: "Las notas especiadas de pimienta y clavo complementan armónicamente la estructura de los grandes Cabernet Franc de guarda.",
-        datoCurioso: "🏔️ **Dato Enológico Mendoza:** El Cabernet Franc del Valle de Uco destaca por su finura, taninos sedosos y notas herbales."
+        datoCurioso: "🏔️ Dato Enológico Mendoza: El Cabernet Franc del Valle de Uco destaca por su finura, taninos sedosos y notas herbales."
     }
 ];
 

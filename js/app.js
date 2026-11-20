@@ -1,4 +1,4 @@
-// Estructura jerárquica exacta según Rueda de Aromas Ultimate (v2)
+// Estructura jerárquica exacta según Rueda de Aromas Ultimate (v2)[cite: 3, 4]
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
         "Frutas de Vino Blanco": {
@@ -54,7 +54,6 @@ const JERARQUIA_AROMAS = {
 };
 
 const STORAGE_KEY = "cata_resultados_estudiantes_v1";
-const TEACHER_PIN = "enologia2026";
 const CLOUD_RESULTS_URL = "https://script.google.com/macros/s/AKfycbxLKtoA325seEtpA0iI00Dy2ZbB_BtVU2id3MVxfm_XR0a9DFREHkLUFHkN-1_lvXao1A/exec";
 
 let score = 0;
@@ -85,15 +84,10 @@ const homeNavBtn = document.getElementById("home-nav-btn");
 const restartMenuBtn = document.getElementById("restart-menu-btn");
 const statsContainer = document.getElementById("stats-container");
 
-// Identificación y Panel Docente
+// Identificación
 const nameModal = document.getElementById("name-modal");
 const studentNameInput = document.getElementById("student-name-input");
 const startSessionBtn = document.getElementById("start-session-btn");
-const openTeacherBtn = document.getElementById("open-teacher-btn");
-const teacherModal = document.getElementById("teacher-modal");
-const closeTeacherBtn = document.getElementById("close-teacher-btn");
-const teacherTableBody = document.getElementById("teacher-table-body");
-const clearRecordsBtn = document.getElementById("clear-records-btn");
 
 const studentTagAroma = document.getElementById("student-tag-aroma");
 const studentTagVis = document.getElementById("student-tag-vis");
@@ -158,7 +152,6 @@ const wheelModal = document.getElementById("wheel-modal");
 document.addEventListener("DOMContentLoaded", () => {
     configurarTemaSVG();
     configurarNavegacion();
-    configurarPanelDocente();
     configurarEventosGlobales();
 });
 
@@ -242,30 +235,6 @@ function configurarNavegacion() {
     restartMenuBtn.addEventListener("click", irAlInicio);
 }
 
-// --- PANEL DOCENTE ---
-function configurarPanelDocente() {
-    openTeacherBtn.addEventListener("click", async () => {
-        const pin = prompt("🔒 Acceso Restringido. Ingrese el PIN docente:");
-        if (pin === TEACHER_PIN) {
-            teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando resultados...</td></tr>`;
-            teacherModal.classList.remove("hidden");
-            const registros = await obtenerResultadosParaDocente();
-            renderizarTablaDocente(registros);
-        } else if (pin !== null) {
-            alert("❌ PIN incorrecto.");
-        }
-    });
-
-    closeTeacherBtn.addEventListener("click", () => teacherModal.classList.add("hidden"));
-
-    clearRecordsBtn.addEventListener("click", () => {
-        if (confirm("¿Deseas borrar los registros guardados en este navegador?")) {
-            localStorage.removeItem(STORAGE_KEY);
-            renderizarTablaDocente([]);
-        }
-    });
-}
-
 async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal) {
     const nuevoRegistro = {
         estudiante: currentStudentName,
@@ -289,47 +258,8 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
             body: JSON.stringify(nuevoRegistro)
         });
     } catch (error) {
-        console.warn("No se pudo enviar a la nube en este intento; queda guardado localmente.", error);
+        console.warn("No se pudo enviar a la planilla en este intento; queda guardado localmente.", error);
     }
-}
-
-async function obtenerResultadosParaDocente() {
-    const locales = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-
-    if (!CLOUD_RESULTS_URL) {
-        return locales;
-    }
-
-    try {
-        const respuesta = await fetch(CLOUD_RESULTS_URL);
-        if (!respuesta.ok) return locales;
-        const datosNube = await respuesta.json();
-        return Array.isArray(datosNube) ? datosNube : locales;
-    } catch (error) {
-        console.warn("Mostrando registros locales por fallo de conexión con la nube.", error);
-        return locales;
-    }
-}
-
-function renderizarTablaDocente(resultados = []) {
-    teacherTableBody.innerHTML = "";
-
-    if (!resultados || resultados.length === 0) {
-        teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No hay registros de estudiantes todavía.</td></tr>`;
-        return;
-    }
-
-    [...resultados].reverse().forEach((res) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td><strong>${res.estudiante}</strong></td>
-            <td><span class="pill-tag" style="font-size: 0.65rem; padding: 4px 10px;">${res.modalidad}</span></td>
-            <td><strong>${res.puntaje} pts</strong></td>
-            <td>${res.rango}</td>
-            <td style="font-size: 0.82rem; color: var(--text-muted);">${res.fecha}</td>
-        `;
-        teacherTableBody.appendChild(tr);
-    });
 }
 
 function iniciarSesion() {
@@ -440,7 +370,6 @@ function handleSelectNivel1(opcionTexto, caso) {
 function renderNivel2(caso) {
     level2Options.innerHTML = "";
     const nodoMacro = JERARQUIA_AROMAS[selectedMacro] || {};
-    // Solo familias pertenecientes a la macro seleccionada (sin mezclar otras ramas)
     const opciones = mezclarArreglo(Object.keys(nodoMacro));
 
     opciones.forEach((opcion) => {
@@ -474,11 +403,9 @@ function handleSelectNivel2(opcionTexto, caso) {
     const nodoFamilia = JERARQUIA_AROMAS[selectedMacro][selectedFamily];
 
     if (Array.isArray(nodoFamilia)) {
-        // Rama directa (ej: Mineral, Levaduras, Defectos): va directo a sus descriptores
         labelL3.textContent = "Descriptor Específico";
         renderDescriptoresDirectos(nodoFamilia);
     } else {
-        // Rama con subfamilias (ej: Vegetal, Frutas de Vino Blanco, Crianza en Barrica)
         labelL3.textContent = "Subfamilia";
         renderSubfamilias(nodoFamilia);
     }
