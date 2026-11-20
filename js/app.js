@@ -55,6 +55,7 @@ const JERARQUIA_AROMAS = {
 
 const STORAGE_KEY = "cata_resultados_estudiantes_v1";
 const TEACHER_PIN = "enologia2026";
+const CLOUD_RESULTS_URL = "https://script.google.com/macros/s/AKfycbxLKtoA325seEtpA0iI00Dy2ZbB_BtVU2id3MVxfm_XR0a9DFREHkLUFHkN-1_lvXao1A/exec";
 
 let score = 0;
 let currentMode = "aroma";
@@ -243,11 +244,13 @@ function configurarNavegacion() {
 
 // --- PANEL DOCENTE ---
 function configurarPanelDocente() {
-    openTeacherBtn.addEventListener("click", () => {
+    openTeacherBtn.addEventListener("click", async () => {
         const pin = prompt("🔒 Acceso Restringido. Ingrese el PIN docente:");
         if (pin === TEACHER_PIN) {
-            renderizarTablaDocente();
+            teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">Cargando resultados...</td></tr>`;
             teacherModal.classList.remove("hidden");
+            const registros = await obtenerResultadosParaDocente();
+            renderizarTablaDocente(registros);
         } else if (pin !== null) {
             alert("❌ PIN incorrecto.");
         }
@@ -256,30 +259,62 @@ function configurarPanelDocente() {
     closeTeacherBtn.addEventListener("click", () => teacherModal.classList.add("hidden"));
 
     clearRecordsBtn.addEventListener("click", () => {
-        if (confirm("¿Deseas borrar todos los registros guardados en este navegador?")) {
+        if (confirm("¿Deseas borrar los registros guardados en este navegador?")) {
             localStorage.removeItem(STORAGE_KEY);
-            renderizarTablaDocente();
+            renderizarTablaDocente([]);
         }
     });
 }
 
-function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal) {
-    const resultados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    resultados.push({
+async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal) {
+    const nuevoRegistro = {
         estudiante: currentStudentName,
         modalidad: modalidadNombre,
         puntaje: puntajeFinal,
         rango: rangoFinal,
         fecha: new Date().toLocaleString()
-    });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(resultados));
+    };
+
+    const resultadosLocales = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    resultadosLocales.push(nuevoRegistro);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(resultadosLocales));
+
+    if (!CLOUD_RESULTS_URL) return;
+
+    try {
+        await fetch(CLOUD_RESULTS_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevoRegistro)
+        });
+    } catch (error) {
+        console.warn("No se pudo enviar a la nube en este intento; queda guardado localmente.", error);
+    }
 }
 
-function renderizarTablaDocente() {
-    teacherTableBody.innerHTML = "";
-    const resultados = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+async function obtenerResultadosParaDocente() {
+    const locales = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
-    if (resultados.length === 0) {
+    if (!CLOUD_RESULTS_URL) {
+        return locales;
+    }
+
+    try {
+        const respuesta = await fetch(CLOUD_RESULTS_URL);
+        if (!respuesta.ok) return locales;
+        const datosNube = await respuesta.json();
+        return Array.isArray(datosNube) ? datosNube : locales;
+    } catch (error) {
+        console.warn("Mostrando registros locales por fallo de conexión con la nube.", error);
+        return locales;
+    }
+}
+
+function renderizarTablaDocente(resultados = []) {
+    teacherTableBody.innerHTML = "";
+
+    if (!resultados || resultados.length === 0) {
         teacherTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 20px;">No hay registros de estudiantes todavía.</td></tr>`;
         return;
     }
