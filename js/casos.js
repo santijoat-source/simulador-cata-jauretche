@@ -7,8 +7,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Primarios",
         familiaCorrecta: "Vegetal",
         descriptorCorrecto: "Pimiento",
-        explicacion: "El pimiento verde (debido a metoxipirrazinas) es una nota característica y primaria en variedades como Cabernet Sauvignon.",
-        datoCurioso: "🍇 Dato Enológico Mendoza: En regiones de Luján de Cuyo y Valle de Uco, este perfil herbal se expresa con notable elegancia."
+        explicacion: "El descriptor pimiento verde se asocia principalmente a compuestos químicos denominados 3-isobutil-2-metoxipirazina (IBMP), presentes en la piel y tejidos herbáceos de la vid y transferidos al mosto durante la maceración.",
+        datoCurioso: "El contenido de metoxipirazinas es sensible al manejo de la canopia y a la radiación solar sobre los racimos. Una mayor exposición lumínica y temperaturas moderadas a elevadas durante la maduración favorecen su degradación natural, mientras que el sombreo excesivo o la cosecha temprana tienden a conservar un perfil pirazínico más marcado."
     },
     {
         id: 2,
@@ -18,8 +18,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Primarios",
         familiaCorrecta: "Frutas de Vino Blanco",
         descriptorCorrecto: "Limón",
-        explicacion: "Los aromas cítricos como el limón son marcadores primarios frescos típicos de Chardonnays jóvenes sin paso por madera.",
-        datoCurioso: "🍋 Dato Enológico Mendoza: El Chardonnay cultivado en altura desarrolla una acidez natural vibrante y notas cítricas marcadas."
+        explicacion: "Las notas cítricas en vinos blancos jóvenes provienen en gran medida de terpenos y ésteres volátiles formados durante el ciclo vegetativo y la fermentación, percibiéndose con mayor nitidez tras la oxigenación moderada al agitar la copa.",
+        datoCurioso: "En viñedos de altura o climas templado-frescos, la amplitud térmica entre el día y la noche ayuda a preservar la acidez total y el pH equilibrado del mosto. Este entorno favorece perfiles aromáticos limpios y vibrantes, evitando la sobremaduración que suele desplazar los aromas cítricos frescos hacia notas más maduras o tropicales."
     },
     {
         id: 3,
@@ -29,8 +29,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Terciarios",
         familiaCorrecta: "Crianza en Barrica de Roble",
         descriptorCorrecto: "Vainilla",
-        explicacion: "La vainilla es un compuesto aromático (vainillina) aportado por la madera de roble durante la crianza en barrica.",
-        datoCurioso: "🪵 Dato Enológico Mendoza: El uso moderado de roble aporta complejidad sin enmascarar la delicada fruta roja."
+        explicacion: "La vainilla es uno de los descriptores característicos de la crianza en madera: se origina a partir de la degradación térmica de la lignina durante el tostado de las duelas, liberando vainillina que se extrae progresivamente hacia el vino.",
+        datoCurioso: "El aporte aromático de la barrica depende de factores como el origen botánico del roble, el nivel de tostado (ligero, medio o fuerte), el tiempo de contacto y la edad del envase. En variedades de piel fina como Pinot Noir, una crianza cuidada busca acompañar la fruta sin cubrir su expresión varietal ni saturar la percepción en boca."
     },
     {
         id: 4,
@@ -40,8 +40,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Defectos",
         familiaCorrecta: "Enfermedad del Corcho",
         descriptorCorrecto: "Sabor al corcho - TCA",
-        explicacion: "El Tricloroanisol (TCA) contamina el corcho natural, generando un defecto inconfundible de humedad y cartón mojado.",
-        datoCurioso: "⚠️ Dato Enológico: Hoy en día se implementan tapas a rosca o corchos tecnológicos para evitar este molesto defecto."
+        explicacion: "El defecto de corcho se vincula habitualmente con el 2,4,6-tricloroanisol (TCA), un compuesto de umbral de percepción extremadamente bajo que puede aparecer cuando ciertos hongos transforman clorofenoles en presencia de humedad y cloro.",
+        datoCurioso: "Aun en concentraciones muy bajas, el TCA puede enmascarar los aromas varietales y restar frescura percibida al vino. Para reducir este riesgo en bodega se aplican controles microbiológicos y fisicoquímicos estrictos en los tapones, sanitización adecuada de instalaciones y alternativas de cierre según el estilo y tiempo de guarda previsto."
     },
     {
         id: 5,
@@ -51,8 +51,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Primarios",
         familiaCorrecta: "Frutas de Vino Tinto",
         descriptorCorrecto: "Ciruela",
-        explicacion: "La ciruela madura es el descriptor frutal por excelencia de los vinos Malbec de alta expresión.",
-        datoCurioso: "🍷 Dato Enológico Mendoza: Su cuna histórica se encuentra en Luján de Cuyo, donde expresa notas únicas de ciruelas y terciopelo."
+        explicacion: "Los descriptores de fruta de carozo oscura, como la ciruela, son habituales en tintos de buena madurez fenólica y se expresan con claridad al combinar la fruta varietal con el equilibrio estructural del vino.",
+        datoCurioso: "La expresión aromática de una variedad no depende solo de la uva, sino de la interacción entre suelo, clima, momento de cosecha y conducción de la fermentación. Un control térmico adecuado durante la fermentación alcohólica ayuda a conservar los compuestos frutales más volátiles frente a pérdidas excesivas por arrastre con el dióxido de carbono."
     },
     {
         id: 6,
@@ -62,8 +62,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Primarios",
         familiaCorrecta: "Floral",
         descriptorCorrecto: "Jazmín",
-        explicacion: "El Torrontés es una variedad aromática rica en terpenos, destacando notas florales inconfundibles como jazmín y azahar.",
-        datoCurioso: "🌸 Dato Enológico: Es la uva blanca emblemática de Argentina, seca y refrescante en boca a pesar de su gran perfume."
+        explicacion: "Las notas florales blancas en variedades aromáticas están fuertemente ligadas a monoterpenos libres y conjugados (como linalool, geraniol y nerol), que aportan intensidad olfativa incluso antes de agitar la copa.",
+        datoCurioso: "Gran parte de los terpenos en la baya se encuentran en forma no volátil (unidos a azúcares como glucósidos) y se liberan progresivamente por acción enzimática o hidrólisis. Por ello, el manejo sanitario de la uva y la elección de levaduras con actividad enzimática adecuada influyen directamente en la limpieza y expresividad floral."
     },
     {
         id: 7,
@@ -73,8 +73,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Primarios",
         familiaCorrecta: "Frutas de Vino Tinto",
         descriptorCorrecto: "Mora",
-        explicacion: "La mora y los frutos negros maduros son descriptores primarios fundamentales del Syrah cultivado en zonas soleadas.",
-        datoCurioso: "🌿 Dato Enológico: El Syrah complementa su perfil con notas de pimienta negra aportadas por la rotundona."
+        explicacion: "Las notas de bayas oscuras como la mora reflejan la madurez aromática de la fruta y se perciben con mayor definición cuando el vino se airea suavemente en la copa, facilitando la volatilización de compuestos frutales.",
+        datoCurioso: "En la cata técnica es clave distinguir entre el aroma percibido en nariz y la sensación táctil en boca (volumen, acidez, alcohol y taninos). Una fruta negra bien definida suele acompañar vinos con buena estructura polifenólica, siempre que la extracción en maceración se haya calibrado para evitar astringencias secantes."
     },
     {
         id: 8,
@@ -84,8 +84,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Defectos",
         familiaCorrecta: "Oxidado",
         descriptorCorrecto: "Jerez",
-        explicacion: "La exposición excesiva al oxígeno degrada los aromas frutales frescos y genera notas avainadas típicas de Jerez.",
-        datoCurioso: "🧪 Dato Enológico: Ocurre por fallas en el sellado o falta de protección adecuada con anhídrido sulfuroso."
+        explicacion: "La oxidación prematura ocurre cuando el vino queda expuesto a un exceso de oxígeno en etapas donde no corresponde, favoreciendo reacciones oxidativas que apagan la fruta fresca y generan notas de frutos secos o crianza oxidativa no deseada.",
+        datoCurioso: "La protección frente al oxígeno se apoya en una gestión rigurosa del anhídrido sulfuroso (SO2) libre y molecular según el pH del vino, el llenado correcto de depósitos y botellas, y la minimización de espacios de cabeza o permeabilidad inadecuada del cierre durante el almacenamiento."
     },
     {
         id: 9,
@@ -95,8 +95,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Primarios",
         familiaCorrecta: "Vegetal",
         descriptorCorrecto: "Pasto cortado",
-        explicacion: "Los tioles volátiles otorgan al Sauvignon Blanc ese perfil herbáceo tan fresco de pasto cortado y hoja de higuera.",
-        datoCurioso: "🌱 Dato Enológico: Exige un manejo preciso del follaje en el viñedo para concentrar sus aromas típicos de altura."
+        explicacion: "Los aromas herbáceos frescos como el pasto cortado se relacionan con compuestos C6 (aldehídos y alcoholes derivados de la lipoxigenasa durante la molienda y el prensado) junto con tioles volátiles característicos de la variedad.",
+        datoCurioso: "El trabajo en bodega sobre la fracción herbácea comienza en la recepción de la uva: prensados suaves, bajas temperaturas y reducción de tiempos de contacto piel-mosto cuando se busca un perfil más limpio y fresco, evitando extracciones duras que aporten amargor o rusticidad."
     },
     {
         id: 10,
@@ -106,8 +106,8 @@ const CASOS_ENOLOGIA = [
         macroCorrecta: "Aromas Terciarios",
         familiaCorrecta: "Crianza en Barrica de Roble",
         descriptorCorrecto: "Pimienta",
-        explicacion: "Las notas especiadas de pimienta y clavo complementan armónicamente la estructura de los grandes Cabernet Franc de guarda.",
-        datoCurioso: "🏔️ Dato Enológico Mendoza: El Cabernet Franc del Valle de Uco destaca por su finura, taninos sedosos y notas herbales."
+        explicacion: "Los matices especiados como la pimienta pueden surgir tanto de compuestos propios de la variedad (como la rotundona en concentraciones moderadas) como de la interacción aromática durante la crianza y evolución en madera y botella.",
+        datoCurioso: "La evolución de un vino tinto de guarda es un proceso dinámico donde interactúan aromas primarios, secundarios (fermentativos) y terciarios (crianza y guarda). Evaluar la armonía entre esos planos permite determinar si el vino está en su etapa juvenil, en plenitud o ganando complejidad con el tiempo."
     }
 ];
 
@@ -119,7 +119,8 @@ const CASOS_VISUALES = [
         capaCorrecta: "Capa Media-Alta",
         tonoCorrecto: "Rojo Violáceo",
         colorHex: "#6a1b9a",
-        explicacion: "Los tonos violáceos intensos son el sello indiscutible de un vino tinto joven sin crianza prolongada."
+        explicacion: "Los reflejos violáceos en un tinto joven se deben a la presencia de antocianos libres y pigmentos jóvenes en un medio de acidez favorable, lo que suele asociarse a elaboraciones recientes sin larga evolución oxidativa.",
+        datoCurioso: "La intensidad y el matiz cromático dependen del pH del vino, la concentración de antocianos y el grosor de la copa. A menor pH, los antocianos tienden a mostrar tonos rojizos y violáceos más vivos, mientras que a pH más altos el color puede verse algo más apagado o azulado."
     },
     {
         id: 2,
@@ -128,7 +129,8 @@ const CASOS_VISUALES = [
         capaCorrecta: "Capa Baja",
         tonoCorrecto: "Amarillo Verdoso",
         colorHex: "#d4edda",
-        explicacion: "Los reflejos verdosos indican juventud, frescura y una excelente acidez natural en blancos."
+        explicacion: "En vinos blancos jóvenes, los matices verdosos sutiles son frecuentes en muestras de vendimia temprana o de zonas más frescas, acompañados de limpidez y brillo cuando la estabilización y clarificación fueron correctas.",
+        datoCurioso: "Al observar un vino blanco contra un fondo blanco y con buena iluminación, conviene inclinar la copa y mirar tanto el centro como el ribete. Con el paso del tiempo o el contacto con madera, el color suele evolucionar desde tonos pajizos o verdosos hacia dorados o ámbar."
     },
     {
         id: 3,
@@ -137,6 +139,7 @@ const CASOS_VISUALES = [
         capaCorrecta: "Capa Alta",
         tonoCorrecto: "Rojo Rubí / Teja",
         colorHex: "#b71c1c",
-        explicacion: "La evolución hacia tonos rubí oscuro y matices teja denota el paso del tiempo y la maduración de los polifenoles."
+        explicacion: "Con la guarda, los antocianos monoméricos reaccionan con taninos y otros compuestos formando pigmentos poliméricos más estables, lo que modifica progresivamente el matiz hacia tonos rubí, ladrillo o teja en el ribete.",
+        datoCurioso: "Un ribete con tendencia teja o anaranjada en un tinto de guarda indica evolución en el tiempo, pero siempre debe interpretarse junto con la fase olfativa y gustativa: un color evolucionado con aromas frescos y equilibrados es propio de la crianza, mientras que un tono apagado con notas oxidativas marca desgaste."
     }
 ];

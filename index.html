@@ -9,7 +9,7 @@
 <body>
     <!-- Barra de Navegación Superior -->
     <header class="app-header">
-        <div class="header-brand" id="brand-logo" title="Ir al Inicio">
+        <div class="header-brand" id="brand-logo" title="Volver al Inicio">
             <span class="brand-title">CATA SENSORIAL</span>
         </div>
 
@@ -25,7 +25,6 @@
                 </div>
             </div>
 
-            <button id="home-nav-btn" class="nav-link-btn hidden">Inicio</button>
             <button id="open-wheel-btn" class="nav-link-btn">Rueda de Aromas</button>
             <button id="open-about-btn" class="nav-link-btn">Acerca de</button>
 
@@ -54,7 +53,7 @@
             <span class="pill-tag">ENTRENAMIENTO SENSORIAL ENOLÓGICO</span>
             <h1 class="hero-title">Tu Guía de <span class="highlight-text">Cata</span><br>y Análisis</h1>
             <p class="hero-subtitle">
-                Desarrolla tu memoria olfativa y visual a través de deducción interactiva sin rutas forzadas, diseñada para la formación enológica profesional.
+                Entrena tu criterio sensorial y tu memoria olfativa y visual mediante deducción guiada por niveles, con un enfoque práctico orientado a la formación enológica.
             </p>
             <div class="hero-cta-group">
                 <button id="enter-modes-btn" class="primary-pill-btn">
@@ -84,7 +83,7 @@
                         </svg>
                     </div>
                     <h3>Árbol Olfativo</h3>
-                    <p>Deducción libre en base a la Rueda de Aromas Ultimate sin caminos predeterminados.</p>
+                    <p>Clasifica aromas primarios, secundarios, terciarios y defectos siguiendo la estructura de la Rueda de Aromas, sin rutas impuestas.</p>
                     <span class="mode-action-link">Seleccionar módulo ➔</span>
                 </div>
 
@@ -96,7 +95,7 @@
                         </svg>
                     </div>
                     <h3>Fase Visual</h3>
-                    <p>Evalúa intensidad de capa, tonalidad del menisco e indicios de evolución en copa.</p>
+                    <p>Analiza la intensidad de capa, el matiz del ribete y la evolución cromática del vino en copa.</p>
                     <span class="mode-action-link">Seleccionar módulo ➔</span>
                 </div>
 
@@ -108,7 +107,7 @@
                         </svg>
                     </div>
                     <h3>Modo Examen</h3>
-                    <p>Evaluación estricta sin consulta de rueda para calificación técnica en clase.</p>
+                    <p>Instancia de evaluación sin apoyo visual de la rueda para medir el criterio técnico en clase.</p>
                     <span class="mode-action-link">Iniciar evaluación ➔</span>
                 </div>
             </div>
@@ -129,7 +128,7 @@
             <div class="divider-line"></div>
 
             <div class="tree-clean-workspace">
-                <p class="tree-instruction">Selecciona una ruta de deducción paso a paso. Toca un nodo elegido para modificarlo.</p>
+                <p class="tree-instruction">Construye la ruta de clasificación nivel por nivel. Toca una selección activa para modificarla.</p>
 
                 <div class="tree-canvas">
                     <div class="root-node-wrapper">
@@ -173,7 +172,7 @@
                     <span class="perception-subtle">Análisis Cromático</span>
                 </div>
                 <h2 id="vis-title" class="sample-title-clean">Cargando Muestra Visual...</h2>
-                <p id="vis-description" class="sample-desc-clean">Observa la intensidad y tonalidad en el menisco de la copa.</p>
+                <p id="vis-description" class="sample-desc-clean">Observa la intensidad de capa y el matiz cromático en la copa.</p>
             </div>
 
             <div class="divider-line"></div>
@@ -204,7 +203,7 @@
         <section id="end-screen" class="fullscreen-section hidden">
             <span class="pill-tag">SESIÓN FINALIZADA</span>
             <h2 class="section-title-large" style="margin-top: 12px;">Resultado Enviado</h2>
-            <p class="hero-subtitle">Tus resultados han sido registrados en la planilla de evaluación de la cátedra.</p>
+            <p class="hero-subtitle">Tus resultados han sido registrados para el seguimiento de la cátedra.</p>
             
             <div class="final-results-clean">
                 <div class="result-clean-stat">
@@ -228,7 +227,7 @@
     <div id="name-modal" class="modal-overlay hidden">
         <div class="modal-content feedback-box text-center">
             <h3>Identificación del Estudiante</h3>
-            <p style="text-align: center; margin-bottom: 16px;">Ingresa tu Nombre y Apellido para registrar tu práctica en la planilla docente.</p>
+            <p id="student-modal-prompt" style="text-align: center; margin-bottom: 16px;">Ingresa tu Nombre y Apellido para registrar tu práctica.</p>
             <input type="text" id="student-name-input" class="student-input-field" placeholder="Ej: Nombre y Apellido" autocomplete="off">
             <button id="start-session-btn" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 16px;">Comenzar Práctica ➔</button>
         </div>
@@ -261,7 +260,7 @@
             <button id="close-about-btn" class="close-btn">&times;</button>
             <h3>Acerca del Simulador Enológico</h3>
             <p style="text-align: left; margin-top: 14px;">
-                Herramienta pedagógica diseñada para la formación en análisis sensorial de vinos. Implementa la jerarquía de la Rueda de Aromas Ultimate permitiendo la exploración libre sin rutas forzadas, fomentando el criterio técnico del estudiante.
+                Recurso didáctico diseñado para el entrenamiento en análisis sensorial de vinos. Organiza la clasificación aromática según la Rueda de Aromas mediante exploración escalonada, promoviendo la observación metódica y el vocabulario técnico.
             </p>
         </div>
     </div>

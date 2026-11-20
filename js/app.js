@@ -1,4 +1,4 @@
-// Estructura jerárquica exacta según Rueda de Aromas Ultimate (v2)[cite: 3, 4]
+// Estructura jerárquica según Rueda de Aromas
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
         "Frutas de Vino Blanco": {
@@ -80,12 +80,12 @@ const endScreen = document.getElementById("end-screen");
 // Navegación
 const brandLogo = document.getElementById("brand-logo");
 const enterModesBtn = document.getElementById("enter-modes-btn");
-const homeNavBtn = document.getElementById("home-nav-btn");
 const restartMenuBtn = document.getElementById("restart-menu-btn");
 const statsContainer = document.getElementById("stats-container");
 
 // Identificación
 const nameModal = document.getElementById("name-modal");
+const studentModalPrompt = document.getElementById("student-modal-prompt");
 const studentNameInput = document.getElementById("student-name-input");
 const startSessionBtn = document.getElementById("start-session-btn");
 
@@ -193,13 +193,16 @@ function configurarNavegacion() {
     enterModesBtn.addEventListener("click", () => {
         ocultarTodasLasPantallas();
         modesScreen.classList.remove("hidden");
-        homeNavBtn.classList.remove("hidden");
         statsContainer.classList.add("hidden");
     });
 
     document.querySelectorAll(".mode-clean-item").forEach((card) => {
         card.addEventListener("click", () => {
             pendingMode = card.getAttribute("data-mode");
+            studentModalPrompt.textContent =
+                pendingMode === "examen"
+                    ? "Ingresa tu Nombre y Apellido para registrar tu evaluación."
+                    : "Ingresa tu Nombre y Apellido para registrar tu práctica.";
             nameModal.classList.remove("hidden");
             studentNameInput.value = "";
             studentNameInput.focus();
@@ -225,13 +228,11 @@ function configurarNavegacion() {
     const irAlInicio = () => {
         ocultarTodasLasPantallas();
         heroScreen.classList.remove("hidden");
-        homeNavBtn.classList.add("hidden");
         statsContainer.classList.add("hidden");
         openWheelBtn.classList.remove("hidden");
     };
 
     brandLogo.addEventListener("click", irAlInicio);
-    homeNavBtn.addEventListener("click", irAlInicio);
     restartMenuBtn.addEventListener("click", irAlInicio);
 }
 
@@ -268,7 +269,6 @@ function iniciarSesion() {
     scoreDisplay.textContent = "0";
     ocultarTodasLasPantallas();
     statsContainer.classList.remove("hidden");
-    homeNavBtn.classList.remove("hidden");
 
     const sufijoModo = currentMode === "examen" ? " (Examen)" : "";
     studentTagAroma.textContent = `Estudiante: ${currentStudentName}${sufijoModo}`;
@@ -568,7 +568,7 @@ verifyVisBtn.addEventListener("click", () => {
     if (esExito) {
         score += 15;
         scoreDisplay.textContent = score;
-        mostrarFeedback(true, `Análisis visual correcto.\n\n${caso.explicacion}`, null);
+        mostrarFeedback(true, `Análisis visual correcto.\n\n${caso.explicacion}`, caso.datoCurioso);
     } else {
         mostrarFeedback(
             false,
@@ -585,7 +585,7 @@ function mostrarFeedback(esCorrecto, mensaje, datoCurioso) {
 
     if (esCorrecto && datoCurioso) {
         feedbackExtra.classList.remove("hidden");
-        feedbackExtra.innerHTML = `<h4>Dato Técnico</h4><p>${datoCurioso.replace(/\*\*/g, "")}</p>`;
+        feedbackExtra.innerHTML = `<h4>Fundamento Técnico y Vitivinícola</h4><p>${datoCurioso}</p>`;
     } else {
         feedbackExtra.classList.add("hidden");
         feedbackExtra.innerHTML = "";
