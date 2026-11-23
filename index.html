@@ -19,6 +19,10 @@
                     <span class="stat-label">Puntos</span>
                     <span id="score-display" class="stat-value">0</span>
                 </div>
+                <div class="stat-pill" id="streak-pill" title="Aciertos consecutivos">
+                    <span class="stat-label">Racha</span>
+                    <span id="streak-display" class="stat-value">0</span>
+                </div>
                 <div class="stat-pill">
                     <span class="stat-label">Muestra</span>
                     <span id="case-counter" class="stat-value">1 / 10</span>
@@ -46,6 +50,11 @@
             </button>
         </div>
     </header>
+
+    <!-- Barra de Progreso de Sesión -->
+    <div id="session-progress-wrapper" class="progress-track hidden">
+        <div id="session-progress-fill" class="progress-fill"></div>
+    </div>
 
     <main class="main-viewport">
         <!-- Pantalla Heroica Inicial -->
@@ -172,14 +181,41 @@
                     <span class="perception-subtle">Análisis Cromático</span>
                 </div>
                 <h2 id="vis-title" class="sample-title-clean">Cargando Muestra Visual...</h2>
-                <p id="vis-description" class="sample-desc-clean">Observa la intensidad de capa y el matiz cromático en la copa.</p>
+                <p id="vis-description" class="sample-desc-clean">Observa la intensidad de capa y el matiz cromático en el menisco de la copa.</p>
             </div>
 
             <div class="divider-line"></div>
 
             <div class="visual-clean-workspace">
-                <div class="wine-glass-preview">
-                    <div id="wine-liquid" class="wine-liquid-sample"></div>
+                <!-- Copa ISO de Cata en SVG con Núcleo y Ribete -->
+                <div class="wine-glass-svg-wrapper" title="Observa el núcleo central y el reflejo en el menisco superior">
+                    <svg class="iso-wine-glass" viewBox="0 0 180 230" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="wine-gradient" cx="50%" cy="62%" r="55%">
+                                <stop id="wine-core-stop" offset="0%" stop-color="#4a0e4e"/>
+                                <stop id="wine-rim-stop" offset="100%" stop-color="#8e24aa"/>
+                            </radialGradient>
+                            <clipPath id="bowl-clip">
+                                <path d="M44 22 H136 L142 84 C144 126 118 148 90 148 C62 148 36 126 38 84 Z"/>
+                            </clipPath>
+                        </defs>
+
+                        <!-- Líquido dentro del cáliz -->
+                        <g clip-path="url(#bowl-clip)">
+                            <rect x="30" y="76" width="120" height="80" fill="url(#wine-gradient)" class="wine-liquid-fill"/>
+                            <!-- Superficie / Menisco -->
+                            <ellipse cx="90" cy="76" rx="51" ry="7" fill="url(#wine-gradient)" opacity="0.88"/>
+                            <ellipse cx="90" cy="76" rx="51" ry="7" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+                        </g>
+
+                        <!-- Contorno de Copa ISO -->
+                        <path d="M44 22 H136 L142 84 C144 126 118 148 90 148 C62 148 36 126 38 84 Z" stroke="var(--border-active)" stroke-width="2.2"/>
+                        <!-- Reflejo de cristal -->
+                        <path d="M49 32 L45 82 C44 106 54 124 67 134" stroke="rgba(255,255,255,0.22)" stroke-width="2" stroke-linecap="round"/>
+                        <!-- Tallo y Base -->
+                        <line x1="90" y1="148" x2="90" y2="208" stroke="var(--border-active)" stroke-width="2.4"/>
+                        <ellipse cx="90" cy="210" rx="38" ry="6" stroke="var(--border-active)" stroke-width="2.2"/>
+                    </svg>
                 </div>
                 
                 <div class="visual-questions-group">
@@ -202,8 +238,8 @@
         <!-- Pantalla Final -->
         <section id="end-screen" class="fullscreen-section hidden">
             <span class="pill-tag">SESIÓN FINALIZADA</span>
-            <h2 class="section-title-large" style="margin-top: 12px;">Resultado Enviado</h2>
-            <p class="hero-subtitle">Tus resultados han sido registrados para el seguimiento de la cátedra.</p>
+            <h2 class="section-title-large" style="margin-top: 12px;">Resultado Registrado</h2>
+            <p id="sync-status-text" class="sync-badge">Sincronizando resultado...</p>
             
             <div class="final-results-clean">
                 <div class="result-clean-stat">
@@ -212,10 +248,18 @@
                 </div>
                 <div class="result-divider"></div>
                 <div class="result-clean-stat">
+                    <span class="stat-label">Precisión</span>
+                    <span id="final-accuracy" class="result-big-number">0%</span>
+                </div>
+                <div class="result-divider"></div>
+                <div class="result-clean-stat">
                     <span class="stat-label">Nivel Alcanzado</span>
                     <span id="final-rank" class="result-big-text">-</span>
                 </div>
             </div>
+
+            <!-- Desglose Pedagógico por Categoría -->
+            <div id="performance-breakdown" class="breakdown-panel hidden"></div>
 
             <div class="hero-cta-group" style="margin-top: 36px;">
                 <button id="restart-menu-btn" class="primary-pill-btn">Volver al Inicio</button>
@@ -236,10 +280,14 @@
     <!-- Modal de Feedback -->
     <div id="feedback-modal" class="modal-overlay hidden">
         <div class="modal-content feedback-box">
-            <h3 id="feedback-status">Resultado del Análisis</h3>
+            <div class="feedback-header-row">
+                <h3 id="feedback-status">Resultado del Análisis</h3>
+                <span id="feedback-streak-tag" class="streak-chip hidden"></span>
+            </div>
             <p id="feedback-text"></p>
             <div id="feedback-extra" class="feedback-extra-box hidden"></div>
             <button id="next-btn" class="primary-pill-btn" style="width: 100%; justify-content: center;">Siguiente Muestra ➔</button>
+            <span class="keyboard-hint">Atajo: presiona Enter para continuar</span>
         </div>
     </div>
 

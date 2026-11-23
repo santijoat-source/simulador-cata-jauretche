@@ -118,7 +118,8 @@ const CASOS_VISUALES = [
         descripcion: "Vino tinto presentado en fase visual directa con tonalidades muy vivaces en el ribete.",
         capaCorrecta: "Capa Media-Alta",
         tonoCorrecto: "Rojo Violáceo",
-        colorHex: "#6a1b9a",
+        colorCoreHex: "#310a3b",
+        colorRimHex: "#8e24aa",
         explicacion: "Los reflejos violáceos en un tinto joven se deben a la presencia de antocianos libres y pigmentos jóvenes en un medio de acidez favorable, lo que suele asociarse a elaboraciones recientes sin larga evolución oxidativa.",
         datoCurioso: "La intensidad y el matiz cromático dependen del pH del vino, la concentración de antocianos y el grosor de la copa. A menor pH, los antocianos tienden a mostrar tonos rojizos y violáceos más vivos, mientras que a pH más altos el color puede verse algo más apagado o azulado."
     },
@@ -128,7 +129,8 @@ const CASOS_VISUALES = [
         descripcion: "Vino blanco brillante con reflejos luminosos en la copa.",
         capaCorrecta: "Capa Baja",
         tonoCorrecto: "Amarillo Verdoso",
-        colorHex: "#d4edda",
+        colorCoreHex: "#e6eeb8",
+        colorRimHex: "#cde3a8",
         explicacion: "En vinos blancos jóvenes, los matices verdosos sutiles son frecuentes en muestras de vendimia temprana o de zonas más frescas, acompañados de limpidez y brillo cuando la estabilización y clarificación fueron correctas.",
         datoCurioso: "Al observar un vino blanco contra un fondo blanco y con buena iluminación, conviene inclinar la copa y mirar tanto el centro como el ribete. Con el paso del tiempo o el contacto con madera, el color suele evolucionar desde tonos pajizos o verdosos hacia dorados o ámbar."
     },
@@ -138,7 +140,8 @@ const CASOS_VISUALES = [
         descripcion: "Vino tinto con varios años de evolución en botella.",
         capaCorrecta: "Capa Alta",
         tonoCorrecto: "Rojo Rubí / Teja",
-        colorHex: "#b71c1c",
+        colorCoreHex: "#4e0d0d",
+        colorRimHex: "#b84a27",
         explicacion: "Con la guarda, los antocianos monoméricos reaccionan con taninos y otros compuestos formando pigmentos poliméricos más estables, lo que modifica progresivamente el matiz hacia tonos rubí, ladrillo o teja en el ribete.",
         datoCurioso: "Un ribete con tendencia teja o anaranjada en un tinto de guarda indica evolución en el tiempo, pero siempre debe interpretarse junto con la fase olfativa y gustativa: un color evolucionado con aromas frescos y equilibrados es propio de la crianza, mientras que un tono apagado con notas oxidativas marca desgaste."
     }

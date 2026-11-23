@@ -57,10 +57,14 @@ const STORAGE_KEY = "cata_resultados_estudiantes_v1";
 const CLOUD_RESULTS_URL = "https://script.google.com/macros/s/AKfycbxLKtoA325seEtpA0iI00Dy2ZbB_BtVU2id3MVxfm_XR0a9DFREHkLUFHkN-1_lvXao1A/exec";
 
 let score = 0;
+let streak = 0;
+let correctAnswersCount = 0;
 let currentMode = "aroma";
 let pendingMode = null;
 let currentStudentName = "Estudiante";
 let casoActualIndex = 0;
+let sessionCases = [];
+let categoryStats = {};
 
 let selectedMacro = null;
 let selectedFamily = null;
@@ -77,11 +81,13 @@ const gameContainer = document.getElementById("game-container");
 const visualContainer = document.getElementById("visual-container");
 const endScreen = document.getElementById("end-screen");
 
-// Navegación
+// Navegación y Progreso
 const brandLogo = document.getElementById("brand-logo");
 const enterModesBtn = document.getElementById("enter-modes-btn");
 const restartMenuBtn = document.getElementById("restart-menu-btn");
 const statsContainer = document.getElementById("stats-container");
+const progressWrapper = document.getElementById("session-progress-wrapper");
+const progressFill = document.getElementById("session-progress-fill");
 
 // Identificación
 const nameModal = document.getElementById("name-modal");
@@ -98,6 +104,8 @@ const aboutModal = document.getElementById("about-modal");
 const closeAboutBtn = document.getElementById("close-about-btn");
 
 const scoreDisplay = document.getElementById("score-display");
+const streakPill = document.getElementById("streak-pill");
+const streakDisplay = document.getElementById("streak-display");
 const caseCounter = document.getElementById("case-counter");
 const themeToggleBtn = document.getElementById("theme-toggle");
 const moonIcon = document.getElementById("moon-icon");
@@ -126,24 +134,29 @@ const samplePerception = document.getElementById("sample-perception");
 const sampleTitle = document.getElementById("sample-title");
 const sampleDescription = document.getElementById("sample-description");
 
-// Visual DOM
+// Visual DOM (Copa ISO SVG)
 const visBadge = document.getElementById("vis-badge");
 const visTitle = document.getElementById("vis-title");
 const visDescription = document.getElementById("vis-description");
-const wineLiquid = document.getElementById("wine-liquid");
+const wineCoreStop = document.getElementById("wine-core-stop");
+const wineRimStop = document.getElementById("wine-rim-stop");
 const capaOptions = document.getElementById("capa-options");
 const tonoOptions = document.getElementById("tono-options");
 const verifyVisBtn = document.getElementById("verify-vis-btn");
 
-// Feedback y Rueda
+// Feedback y Cierre
 const feedbackModal = document.getElementById("feedback-modal");
 const feedbackStatus = document.getElementById("feedback-status");
+const feedbackStreakTag = document.getElementById("feedback-streak-tag");
 const feedbackText = document.getElementById("feedback-text");
 const feedbackExtra = document.getElementById("feedback-extra");
 const nextBtn = document.getElementById("next-btn");
 
+const syncStatusText = document.getElementById("sync-status-text");
 const finalScoreEl = document.getElementById("final-score");
+const finalAccuracyEl = document.getElementById("final-accuracy");
 const finalRankEl = document.getElementById("final-rank");
+const performanceBreakdownEl = document.getElementById("performance-breakdown");
 
 const openWheelBtn = document.getElementById("open-wheel-btn");
 const closeWheelBtn = document.getElementById("close-wheel-btn");
@@ -194,15 +207,17 @@ function configurarNavegacion() {
         ocultarTodasLasPantallas();
         modesScreen.classList.remove("hidden");
         statsContainer.classList.add("hidden");
+        progressWrapper.classList.add("hidden");
     });
 
     document.querySelectorAll(".mode-clean-item").forEach((card) => {
         card.addEventListener("click", () => {
             pendingMode = card.getAttribute("data-mode");
-            studentModalPrompt.textContent =
-                pendingMode === "examen"
-                    ? "Ingresa tu Nombre y Apellido para registrar tu evaluación."
-                    : "Ingresa tu Nombre y Apellido para registrar tu práctica.";
+            const esExamen = pendingMode === "examen";
+            studentModalPrompt.textContent = esExamen
+                ? "Ingresa tu Nombre y Apellido para registrar tu evaluación."
+                : "Ingresa tu Nombre y Apellido para registrar tu práctica.";
+            startSessionBtn.textContent = esExamen ? "Comenzar Evaluación ➔" : "Comenzar Práctica ➔";
             nameModal.classList.remove("hidden");
             studentNameInput.value = "";
             studentNameInput.focus();
@@ -229,11 +244,27 @@ function configurarNavegacion() {
         ocultarTodasLasPantallas();
         heroScreen.classList.remove("hidden");
         statsContainer.classList.add("hidden");
+        progressWrapper.classList.add("hidden");
         openWheelBtn.classList.remove("hidden");
     };
 
     brandLogo.addEventListener("click", irAlInicio);
     restartMenuBtn.addEventListener("click", irAlInicio);
+}
+
+function actualizarProgreso(indiceActual, totalCasos) {
+    const porcentaje = Math.round((indiceActual / totalCasos) * 100);
+    progressFill.style.width = `${porcentaje}%`;
+}
+
+function registrarEstadisticaCategoria(categoria, acerto) {
+    if (!categoryStats[categoria]) {
+        categoryStats[categoria] = { aciertos: 0, total: 0 };
+    }
+    categoryStats[categoria].total += 1;
+    if (acerto) {
+        categoryStats[categoria].aciertos += 1;
+    }
 }
 
 async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal) {
@@ -249,8 +280,12 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
     resultadosLocales.push(nuevoRegistro);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(resultadosLocales));
 
-    if (!CLOUD_RESULTS_URL) return;
+    if (!CLOUD_RESULTS_URL) {
+        syncStatusText.textContent = "Resultado guardado localmente en este dispositivo.";
+        return;
+    }
 
+    syncStatusText.textContent = "Registrando resultado en la planilla...";
     try {
         await fetch(CLOUD_RESULTS_URL, {
             method: "POST",
@@ -258,17 +293,27 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nuevoRegistro)
         });
+        syncStatusText.textContent = "✓ Resultado enviado y registrado correctamente.";
     } catch (error) {
-        console.warn("No se pudo enviar a la planilla en este intento; queda guardado localmente.", error);
+        syncStatusText.textContent = "Guardado localmente (sin conexión para sincronizar ahora).";
     }
 }
 
 function iniciarSesion() {
     score = 0;
+    streak = 0;
+    correctAnswersCount = 0;
     casoActualIndex = 0;
+    categoryStats = {};
+
     scoreDisplay.textContent = "0";
+    streakDisplay.textContent = "0";
+    streakPill.classList.remove("streak-hot");
+
     ocultarTodasLasPantallas();
     statsContainer.classList.remove("hidden");
+    progressWrapper.classList.remove("hidden");
+    actualizarProgreso(0, 1);
 
     const sufijoModo = currentMode === "examen" ? " (Examen)" : "";
     studentTagAroma.textContent = `Estudiante: ${currentStudentName}${sufijoModo}`;
@@ -281,9 +326,11 @@ function iniciarSesion() {
     }
 
     if (currentMode === "visual") {
+        sessionCases = mezclarArreglo(CASOS_VISUALES);
         visualContainer.classList.remove("hidden");
         cargarCasoVisual();
     } else {
+        sessionCases = mezclarArreglo(CASOS_ENOLOGIA);
         gameContainer.classList.remove("hidden");
         cargarCasoAroma();
     }
@@ -311,18 +358,19 @@ function resetearNivelesInferiores(desdeNivel) {
 }
 
 function cargarCasoAroma() {
-    const caso = CASOS_ENOLOGIA[casoActualIndex];
+    const caso = sessionCases[casoActualIndex];
     selectedMacro = null;
     selectedFamily = null;
     selectedSubfamily = null;
     selectedDescriptor = null;
     verifyBtn.disabled = true;
 
-    sampleBadge.textContent = `Muestra #${caso.id}`;
+    actualizarProgreso(casoActualIndex, sessionCases.length);
+    sampleBadge.textContent = `Muestra ${casoActualIndex + 1}`;
     samplePerception.textContent = caso.percepcion;
     sampleTitle.textContent = caso.titulo;
     sampleDescription.textContent = caso.descripcion;
-    caseCounter.textContent = `${casoActualIndex + 1} / ${CASOS_ENOLOGIA.length}`;
+    caseCounter.textContent = `${casoActualIndex + 1} / ${sessionCases.length}`;
     rootNodeTitle.textContent = caso.titulo;
 
     feedbackModal.classList.add("hidden");
@@ -483,13 +531,25 @@ function renderDescriptoresDirectos(listaDescriptores) {
     });
 }
 
+function generarDiagnosticoErrorAroma(caso) {
+    if (selectedMacro !== caso.macroCorrecta) {
+        return `Clasificaste la muestra dentro de "${selectedMacro}", pero su origen sensorial corresponde a "${caso.macroCorrecta}". Recuerda distinguir si el compuesto proviene de la uva (Primario), de la fermentación (Secundario), de la crianza (Terciario) o de una alteración (Defecto).`;
+    }
+    if (selectedFamily !== caso.familiaCorrecta) {
+        return `Ubicaste bien la categoría general ("${caso.macroCorrecta}"), pero elegiste la familia "${selectedFamily}" en lugar de "${caso.familiaCorrecta}".`;
+    }
+    return `Acertaste la categoría general y la familia ("${caso.familiaCorrecta}"), pero dentro de ella el descriptor específico de la muestra era "${caso.descriptorCorrecto}".`;
+}
+
 verifyBtn.addEventListener("click", () => {
     if (!selectedMacro || !selectedFamily || !selectedDescriptor) return;
-    const caso = CASOS_ENOLOGIA[casoActualIndex];
+    const caso = sessionCases[casoActualIndex];
     const esExito =
         selectedMacro === caso.macroCorrecta &&
         selectedFamily === caso.familiaCorrecta &&
         selectedDescriptor === caso.descriptorCorrecto;
+
+    registrarEstadisticaCategoria(caso.macroCorrecta, esExito);
 
     const rutaElegida = selectedSubfamily
         ? `${selectedMacro} › ${selectedFamily} › ${selectedSubfamily} › ${selectedDescriptor}`
@@ -499,12 +559,18 @@ verifyBtn.addEventListener("click", () => {
 
     if (esExito) {
         score += 15;
-        scoreDisplay.textContent = score;
+        streak += 1;
+        correctAnswersCount += 1;
+        actualizarMarcadoresSuperiores();
         mostrarFeedback(true, `Deducción correcta.\n\n${caso.explicacion}`, caso.datoCurioso);
     } else {
+        streak = 0;
+        actualizarMarcadoresSuperiores();
+        if (navigator.vibrate) navigator.vibrate(40);
+        const diagnostico = generarDiagnosticoErrorAroma(caso);
         mostrarFeedback(
             false,
-            `Discrepancia en el análisis.\n\n• Elegiste: ${rutaElegida}\n• Esperado: ${rutaCorrecta}\n\n${caso.explicacion}`,
+            `Discrepancia en el análisis.\n\n• Elegiste: ${rutaElegida}\n• Esperado: ${rutaCorrecta}\n\n${diagnostico}\n\n${caso.explicacion}`,
             null
         );
     }
@@ -512,16 +578,21 @@ verifyBtn.addEventListener("click", () => {
 
 // --- MÓDULO VISUAL ---
 function cargarCasoVisual() {
-    const caso = CASOS_VISUALES[casoActualIndex % CASOS_VISUALES.length];
+    const caso = sessionCases[casoActualIndex];
     selectedCapa = null;
     selectedTono = null;
     verifyVisBtn.disabled = true;
 
-    visBadge.textContent = `Fase Visual #${caso.id}`;
+    actualizarProgreso(casoActualIndex, sessionCases.length);
+    visBadge.textContent = `Fase Visual ${casoActualIndex + 1}`;
     visTitle.textContent = caso.titulo;
     visDescription.textContent = caso.descripcion;
-    caseCounter.textContent = `${(casoActualIndex % CASOS_VISUALES.length) + 1} / ${CASOS_VISUALES.length}`;
-    wineLiquid.style.background = caso.colorHex;
+    caseCounter.textContent = `${casoActualIndex + 1} / ${sessionCases.length}`;
+
+    if (wineCoreStop && wineRimStop) {
+        wineCoreStop.setAttribute("stop-color", caso.colorCoreHex || caso.colorHex || "#4a0e4e");
+        wineRimStop.setAttribute("stop-color", caso.colorRimHex || caso.colorHex || "#8e24aa");
+    }
 
     renderOpcionesVisuales();
 }
@@ -562,26 +633,50 @@ function chequearVisReady() {
 }
 
 verifyVisBtn.addEventListener("click", () => {
-    const caso = CASOS_VISUALES[casoActualIndex % CASOS_VISUALES.length];
+    const caso = sessionCases[casoActualIndex];
     const esExito = selectedCapa === caso.capaCorrecta && selectedTono === caso.tonoCorrecto;
+
+    registrarEstadisticaCategoria("Fase Visual", esExito);
 
     if (esExito) {
         score += 15;
-        scoreDisplay.textContent = score;
+        streak += 1;
+        correctAnswersCount += 1;
+        actualizarMarcadoresSuperiores();
         mostrarFeedback(true, `Análisis visual correcto.\n\n${caso.explicacion}`, caso.datoCurioso);
     } else {
+        streak = 0;
+        actualizarMarcadoresSuperiores();
+        if (navigator.vibrate) navigator.vibrate(40);
         mostrarFeedback(
             false,
-            `Discrepancia en la fase visual.\n• Correcto: ${caso.capaCorrecta} y ${caso.tonoCorrecto}\n\n${caso.explicacion}`,
+            `Discrepancia en la fase visual.\n\n• Elegiste: ${selectedCapa} y ${selectedTono}\n• Esperado: ${caso.capaCorrecta} y ${caso.tonoCorrecto}\n\n${caso.explicacion}`,
             null
         );
     }
 });
 
+function actualizarMarcadoresSuperiores() {
+    scoreDisplay.textContent = score;
+    streakDisplay.textContent = streak;
+    if (streak >= 2) {
+        streakPill.classList.add("streak-hot");
+    } else {
+        streakPill.classList.remove("streak-hot");
+    }
+}
+
 function mostrarFeedback(esCorrecto, mensaje, datoCurioso) {
     feedbackModal.classList.remove("hidden");
     feedbackStatus.textContent = esCorrecto ? "Análisis Exitoso (+15 pts)" : "Discrepancia Sensorial";
     feedbackText.innerText = mensaje;
+
+    if (esCorrecto && streak >= 2) {
+        feedbackStreakTag.textContent = `Racha x${streak}`;
+        feedbackStreakTag.classList.remove("hidden");
+    } else {
+        feedbackStreakTag.classList.add("hidden");
+    }
 
     if (esCorrecto && datoCurioso) {
         feedbackExtra.classList.remove("hidden");
@@ -594,8 +689,7 @@ function mostrarFeedback(esCorrecto, mensaje, datoCurioso) {
 
 nextBtn.addEventListener("click", () => {
     casoActualIndex++;
-    const maxCasos = currentMode === "visual" ? CASOS_VISUALES.length : CASOS_ENOLOGIA.length;
-    if (casoActualIndex < maxCasos) {
+    if (casoActualIndex < sessionCases.length) {
         if (currentMode === "visual") cargarCasoVisual();
         else cargarCasoAroma();
     } else {
@@ -603,19 +697,71 @@ nextBtn.addEventListener("click", () => {
     }
 });
 
+function animarContadorNumerico(elemento, valorFinal, sufijo = "") {
+    const duracion = 650;
+    const inicio = performance.now();
+    function actualizar(ahora) {
+        const progreso = Math.min((ahora - inicio) / duracion, 1);
+        const valorActual = Math.round(progreso * valorFinal);
+        elemento.textContent = `${valorActual}${sufijo}`;
+        if (progreso < 1) {
+            requestAnimationFrame(actualizar);
+        }
+    }
+    requestAnimationFrame(actualizar);
+}
+
+function renderizarDesgloseFinal() {
+    const entradas = Object.entries(categoryStats);
+    if (entradas.length === 0) {
+        performanceBreakdownEl.classList.add("hidden");
+        return;
+    }
+
+    performanceBreakdownEl.classList.remove("hidden");
+    const itemsHTML = entradas
+        .map(([cat, datos]) => {
+            return `
+                <div class="breakdown-item">
+                    <span>${cat}</span>
+                    <span class="breakdown-score">${datos.aciertos} / ${datos.total}</span>
+                </div>
+            `;
+        })
+        .join("");
+
+    performanceBreakdownEl.innerHTML = `
+        <h4>Desglose de Precisión por Categoría</h4>
+        <div class="breakdown-grid">${itemsHTML}</div>
+    `;
+}
+
 function mostrarPantallaFinal() {
+    actualizarProgreso(sessionCases.length, sessionCases.length);
     ocultarTodasLasPantallas();
     statsContainer.classList.add("hidden");
     openWheelBtn.classList.remove("hidden");
 
-    const rangoFinal = score >= 120 ? "Enólogo Master" : score >= 75 ? "Sommelier Avanzado" : "Práctica Inicial";
+    const totalMuestras = sessionCases.length || 1;
+    const porcentajePrecision = Math.round((correctAnswersCount / totalMuestras) * 100);
+
+    const rangoFinal =
+        porcentajePrecision >= 80
+            ? "Enólogo Master"
+            : porcentajePrecision >= 50
+            ? "Sommelier Avanzado"
+            : "Práctica Inicial";
+
     const modalidadNombre =
         currentMode === "visual" ? "Fase Visual" : currentMode === "examen" ? "Modo Examen" : "Árbol Olfativo";
 
     guardarResultadoEstudiante(modalidadNombre, score, rangoFinal);
 
-    finalScoreEl.textContent = score;
+    animarContadorNumerico(finalScoreEl, score);
+    animarContadorNumerico(finalAccuracyEl, porcentajePrecision, "%");
     finalRankEl.textContent = rangoFinal;
+    renderizarDesgloseFinal();
+
     endScreen.classList.remove("hidden");
 }
 
@@ -624,6 +770,13 @@ function configurarEventosGlobales() {
     if (closeWheelBtn) closeWheelBtn.addEventListener("click", () => wheelModal.classList.add("hidden"));
     if (openAboutBtn) openAboutBtn.addEventListener("click", () => aboutModal.classList.remove("hidden"));
     if (closeAboutBtn) closeAboutBtn.addEventListener("click", () => aboutModal.classList.add("hidden"));
+
+    document.addEventListener("keydown", (e) => {
+        if ((e.key === "Enter" || e.key === " ") && !feedbackModal.classList.contains("hidden")) {
+            e.preventDefault();
+            nextBtn.click();
+        }
+    });
 }
 
 function mezclarArreglo(arreglo) {
