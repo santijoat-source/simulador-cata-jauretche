@@ -1,3 +1,27 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import {
+    getDatabase,
+    ref,
+    set,
+    update,
+    onValue,
+    off
+} from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDVmWPbV5d2tMZSZtnrpWedEXtGwy-SBVI",
+    authDomain: "cata-sensorial-online.firebaseapp.com",
+    databaseURL: "https://cata-sensorial-online-default-rtdb.firebaseio.com",
+    projectId: "cata-sensorial-online",
+    storageBucket: "cata-sensorial-online.firebasestorage.app",
+    messagingSenderId: "860177029192",
+    appId: "1:860177029192:web:d8ceb52fc171dd6fda207d",
+    measurementId: "G-006R6QPQV5"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
+
 // Estructura jerárquica según Rueda de Aromas
 const JERARQUIA_AROMAS = {
     "Aromas Primarios": {
@@ -55,7 +79,9 @@ const JERARQUIA_AROMAS = {
 
 const STORAGE_KEY = "cata_resultados_estudiantes_v1";
 const CLOUD_RESULTS_URL = "https://script.google.com/macros/s/AKfycbxLKtoA325seEtpA0iI00Dy2ZbB_BtVU2id3MVxfm_XR0a9DFREHkLUFHkN-1_lvXao1A/exec";
+const LIVE_ROUND_SECONDS = 30;
 
+// Estado individual
 let score = 0;
 let streak = 0;
 let correctAnswersCount = 0;
@@ -74,11 +100,26 @@ let selectedDescriptor = null;
 let selectedCapa = null;
 let selectedTono = null;
 
+// Estado Sala en Vivo (Kahoot)
+let activeRoomRef = null;
+let activeRoomCode = null;
+let isRoomHost = false;
+let playerId = null;
+let currentRoomState = null;
+let liveTimerInterval = null;
+let liveSubmittedRound = -1;
+
+let liveMacro = null;
+let liveFamily = null;
+let liveSubfamily = null;
+let liveDescriptor = null;
+
 // Pantallas
 const heroScreen = document.getElementById("hero-screen");
 const modesScreen = document.getElementById("modes-screen");
 const gameContainer = document.getElementById("game-container");
 const visualContainer = document.getElementById("visual-container");
+const liveContainer = document.getElementById("live-container");
 const endScreen = document.getElementById("end-screen");
 
 // Navegación y Progreso
@@ -135,7 +176,7 @@ const samplePerception = document.getElementById("sample-perception");
 const sampleTitle = document.getElementById("sample-title");
 const sampleDescription = document.getElementById("sample-description");
 
-// Visual DOM (Copa ISO SVG)
+// Visual DOM
 const visBadge = document.getElementById("vis-badge");
 const visTitle = document.getElementById("vis-title");
 const visDescription = document.getElementById("vis-description");
@@ -144,6 +185,53 @@ const wineRimStop = document.getElementById("wine-rim-stop");
 const capaOptions = document.getElementById("capa-options");
 const tonoOptions = document.getElementById("tono-options");
 const verifyVisBtn = document.getElementById("verify-vis-btn");
+
+// Sala en Vivo DOM
+const liveLobby = document.getElementById("live-lobby");
+const createLiveRoomBtn = document.getElementById("create-live-room-btn");
+const liveRoomCodeInput = document.getElementById("live-room-code-input");
+const joinLiveRoomBtn = document.getElementById("join-live-room-btn");
+
+const liveHostView = document.getElementById("live-host-view");
+const hostRoomCode = document.getElementById("host-room-code");
+const hostPlayerCount = document.getElementById("host-player-count");
+const hostAnsweredCount = document.getElementById("host-answered-count");
+const hostRoundIndicator = document.getElementById("host-round-indicator");
+const hostQuestionPreview = document.getElementById("host-question-preview");
+const hostSampleTitle = document.getElementById("host-sample-title");
+const hostSampleDesc = document.getElementById("host-sample-desc");
+const hostSampleAnswer = document.getElementById("host-sample-answer");
+const hostPlayersList = document.getElementById("host-players-list");
+const hostNextRoundBtn = document.getElementById("host-next-round-btn");
+const hostRevealBtn = document.getElementById("host-reveal-btn");
+const hostFinishBtn = document.getElementById("host-finish-btn");
+
+const livePlayerView = document.getElementById("live-player-view");
+const playerRoomBadge = document.getElementById("player-room-badge");
+const liveTimerDisplay = document.getElementById("live-timer-display");
+const liveMyScore = document.getElementById("live-my-score");
+const liveWaitingCard = document.getElementById("live-waiting-card");
+const liveWaitingMessage = document.getElementById("live-waiting-message");
+const liveQuestionCard = document.getElementById("live-question-card");
+const liveSampleBadge = document.getElementById("live-sample-badge");
+const liveSampleTitle = document.getElementById("live-sample-title");
+const liveSampleDesc = document.getElementById("live-sample-desc");
+const liveL1Options = document.getElementById("live-l1-options");
+const liveLine2 = document.getElementById("live-line-2");
+const liveL2Container = document.getElementById("live-l2-container");
+const liveL2Options = document.getElementById("live-l2-options");
+const liveLine3 = document.getElementById("live-line-3");
+const liveL3Container = document.getElementById("live-l3-container");
+const liveL3Label = document.getElementById("live-l3-label");
+const liveL3Options = document.getElementById("live-l3-options");
+const liveSubmitAnswerBtn = document.getElementById("live-submit-answer-btn");
+const liveRoundResultCard = document.getElementById("live-round-result-card");
+const liveRoundStatus = document.getElementById("live-round-status");
+const liveRoundDetail = document.getElementById("live-round-detail");
+
+const liveLeaderboardView = document.getElementById("live-leaderboard-view");
+const liveLeaderboardList = document.getElementById("live-leaderboard-list");
+const liveBackHomeBtn = document.getElementById("live-back-home-btn");
 
 // Feedback y Cierre
 const feedbackModal = document.getElementById("feedback-modal");
@@ -167,6 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarTemaSVG();
     configurarNavegacion();
     configurarEventosGlobales();
+    configurarSalaEnVivo();
 });
 
 function configurarTemaSVG() {
@@ -198,9 +287,25 @@ function ocultarTodasLasPantallas() {
     modesScreen.classList.add("hidden");
     gameContainer.classList.add("hidden");
     visualContainer.classList.add("hidden");
+    liveContainer.classList.add("hidden");
     endScreen.classList.add("hidden");
     feedbackModal.classList.add("hidden");
     nameModal.classList.add("hidden");
+}
+
+function limpiarSuscripcionSala() {
+    if (liveTimerInterval) {
+        clearInterval(liveTimerInterval);
+        liveTimerInterval = null;
+    }
+    if (activeRoomRef) {
+        off(activeRoomRef);
+        activeRoomRef = null;
+    }
+    activeRoomCode = null;
+    isRoomHost = false;
+    currentRoomState = null;
+    liveSubmittedRound = -1;
 }
 
 function configurarNavegacion() {
@@ -214,6 +319,18 @@ function configurarNavegacion() {
     document.querySelectorAll(".mode-clean-item").forEach((card) => {
         card.addEventListener("click", () => {
             pendingMode = card.getAttribute("data-mode");
+            if (pendingMode === "live") {
+                ocultarTodasLasPantallas();
+                statsContainer.classList.add("hidden");
+                progressWrapper.classList.add("hidden");
+                liveLobby.classList.remove("hidden");
+                liveHostView.classList.add("hidden");
+                livePlayerView.classList.add("hidden");
+                liveLeaderboardView.classList.add("hidden");
+                liveContainer.classList.remove("hidden");
+                return;
+            }
+
             const esExamen = pendingMode === "examen";
             studentModalPrompt.textContent = esExamen
                 ? "Ingresa tu Nombre y Apellido para registrar tu evaluación."
@@ -242,6 +359,7 @@ function configurarNavegacion() {
     });
 
     const irAlInicio = () => {
+        limpiarSuscripcionSala();
         ocultarTodasLasPantallas();
         heroScreen.classList.remove("hidden");
         statsContainer.classList.add("hidden");
@@ -251,6 +369,7 @@ function configurarNavegacion() {
 
     brandLogo.addEventListener("click", irAlInicio);
     restartMenuBtn.addEventListener("click", irAlInicio);
+    liveBackHomeBtn.addEventListener("click", irAlInicio);
 }
 
 function actualizarProgreso(indiceActual, totalCasos) {
@@ -775,6 +894,454 @@ function mostrarPantallaFinal() {
     renderizarDesgloseFinal();
 
     endScreen.classList.remove("hidden");
+}
+
+// ==========================================
+// SALA EN VIVO (TIPO KAHOOT CON FIREBASE RTDB)
+// ==========================================
+function generarCodigoSala() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "";
+    for (let i = 0; i < 6; i++) {
+        code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+}
+
+function calcularPuntosKahoot(esCorrecta, tiempoTranscurridoSeg, tiempoLimiteSeg) {
+    if (!esCorrecta) return 0;
+    const restante = Math.max(0, tiempoLimiteSeg - tiempoTranscurridoSeg);
+    const bonoVelocidad = Math.round(50 * (restante / tiempoLimiteSeg));
+    return 100 + bonoVelocidad;
+}
+
+function configurarSalaEnVivo() {
+    createLiveRoomBtn.addEventListener("click", async () => {
+        const codigo = generarCodigoSala();
+        const baraja = mezclarArreglo(CASOS_ENOLOGIA).map((c) => c.id);
+        activeRoomCode = codigo;
+        isRoomHost = true;
+
+        const roomData = {
+            code: codigo,
+            status: "lobby", // lobby | question | finished
+            roundIndex: -1,
+            roundStartedAt: 0,
+            roundDuration: LIVE_ROUND_SECONDS,
+            revealAnswer: false,
+            caseIds: baraja,
+            players: {}
+        };
+
+        await set(ref(db, `rooms/${codigo}`), roomData);
+        suscribirSala(codigo, true);
+    });
+
+    joinLiveRoomBtn.addEventListener("click", async () => {
+        const codigo = liveRoomCodeInput.value.trim().toUpperCase();
+        if (!codigo) {
+            alert("Ingresa el código de la sala.");
+            return;
+        }
+        const nombre = prompt("Ingresa tu Nombre y Apellido para competir:");
+        if (!nombre || !nombre.trim()) {
+            alert("Debes ingresar tu Nombre y Apellido.");
+            return;
+        }
+
+        currentStudentName = nombre.trim();
+        playerId = `p_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        activeRoomCode = codigo;
+        isRoomHost = false;
+
+        await set(ref(db, `rooms/${codigo}/players/${playerId}`), {
+            name: currentStudentName,
+            score: 0,
+            correctCount: 0,
+            totalTimeSec: 0,
+            lastRoundAnswered: -1
+        });
+
+        suscribirSala(codigo, false);
+    });
+
+    hostNextRoundBtn.addEventListener("click", async () => {
+        if (!currentRoomState || !activeRoomCode) return;
+        const nextIdx = (currentRoomState.roundIndex ?? -1) + 1;
+        const total = (currentRoomState.caseIds || []).length;
+
+        if (nextIdx >= total) {
+            await update(ref(db, `rooms/${activeRoomCode}`), { status: "finished" });
+            return;
+        }
+
+        await update(ref(db, `rooms/${activeRoomCode}`), {
+            status: "question",
+            roundIndex: nextIdx,
+            roundStartedAt: Date.now(),
+            revealAnswer: false
+        });
+    });
+
+    hostRevealBtn.addEventListener("click", async () => {
+        if (!activeRoomCode) return;
+        await update(ref(db, `rooms/${activeRoomCode}`), { revealAnswer: true });
+    });
+
+    hostFinishBtn.addEventListener("click", async () => {
+        if (!activeRoomCode) return;
+        await update(ref(db, `rooms/${activeRoomCode}`), { status: "finished" });
+    });
+
+    liveSubmitAnswerBtn.addEventListener("click", async () => {
+        if (!currentRoomState || !activeRoomCode || !playerId) return;
+        const roundIdx = currentRoomState.roundIndex;
+        if (liveSubmittedRound === roundIdx) return;
+
+        const caseId = currentRoomState.caseIds[roundIdx];
+        const caso = CASOS_ENOLOGIA.find((c) => c.id === caseId);
+        if (!caso) return;
+
+        const esCorrecta =
+            liveMacro === caso.macroCorrecta &&
+            liveFamily === caso.familiaCorrecta &&
+            liveDescriptor === caso.descriptorCorrecto;
+
+        const elapsedSec = Math.max(0, (Date.now() - (currentRoomState.roundStartedAt || Date.now())) / 1000);
+        const puntosGanados = calcularPuntosKahoot(esCorrecta, elapsedSec, LIVE_ROUND_SECONDS);
+
+        const playersObj = currentRoomState.players || {};
+        const me = playersObj[playerId] || { score: 0, correctCount: 0, totalTimeSec: 0 };
+
+        liveSubmittedRound = roundIdx;
+        liveSubmitAnswerBtn.disabled = true;
+
+        await update(ref(db, `rooms/${activeRoomCode}/players/${playerId}`), {
+            score: (me.score || 0) + puntosGanados,
+            correctCount: (me.correctCount || 0) + (esCorrecta ? 1 : 0),
+            totalTimeSec: Number(((me.totalTimeSec || 0) + Math.min(elapsedSec, LIVE_ROUND_SECONDS)).toFixed(2)),
+            lastRoundAnswered: roundIdx
+        });
+
+        liveQuestionCard.classList.add("hidden");
+        liveRoundResultCard.classList.remove("hidden");
+        liveRoundStatus.textContent = esCorrecta ? `¡Correcto! +${puntosGanados} pts` : "Respuesta Incorrecta (+0 pts)";
+        liveRoundDetail.textContent = `Tiempo empleado: ${elapsedSec.toFixed(1)}s. Esperando que la profesora avance a la siguiente muestra...`;
+    });
+}
+
+function suscribirSala(codigo, comoHost) {
+    liveLobby.classList.add("hidden");
+    if (comoHost) {
+        liveHostView.classList.remove("hidden");
+        hostRoomCode.textContent = codigo;
+    } else {
+        livePlayerView.classList.remove("hidden");
+        playerRoomBadge.textContent = `Sala: ${codigo}`;
+    }
+
+    activeRoomRef = ref(db, `rooms/${codigo}`);
+    onValue(activeRoomRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        currentRoomState = data;
+
+        if (data.status === "finished") {
+            mostrarRankingSala(data);
+            return;
+        }
+
+        if (comoHost) {
+            renderizarVistaDocente(data);
+        } else {
+            renderizarVistaJugador(data);
+        }
+    });
+}
+
+function renderizarVistaDocente(data) {
+    const players = Object.values(data.players || {});
+    const roundIdx = data.roundIndex ?? -1;
+    const totalRounds = (data.caseIds || []).length;
+
+    hostPlayerCount.textContent = String(players.length);
+    hostRoundIndicator.textContent = `${Math.max(0, roundIdx + 1)} / ${totalRounds}`;
+
+    const answered = players.filter((p) => p.lastRoundAnswered === roundIdx && roundIdx >= 0).length;
+    hostAnsweredCount.textContent = `${answered} / ${players.length}`;
+
+    hostPlayersList.innerHTML = "";
+    if (players.length === 0) {
+        hostPlayersList.innerHTML = `<span class="perception-subtle">Esperando conexiones de estudiantes...</span>`;
+    } else {
+        players.forEach((p) => {
+            const chip = document.createElement("div");
+            const listo = roundIdx >= 0 && p.lastRoundAnswered === roundIdx;
+            chip.className = `player-chip ${listo ? "answered" : ""}`;
+            chip.textContent = `${p.name} · ${p.score || 0} pts${listo ? " ✓" : ""}`;
+            hostPlayersList.appendChild(chip);
+        });
+    }
+
+    if (roundIdx >= 0 && data.status === "question") {
+        const caso = CASOS_ENOLOGIA.find((c) => c.id === data.caseIds[roundIdx]);
+        if (caso) {
+            hostQuestionPreview.classList.remove("hidden");
+            hostSampleTitle.textContent = caso.titulo;
+            hostSampleDesc.textContent = caso.descripcion;
+            hostRevealBtn.classList.remove("hidden");
+
+            if (data.revealAnswer) {
+                hostSampleAnswer.classList.remove("hidden");
+                hostSampleAnswer.textContent = `Respuesta: ${caso.macroCorrecta} › ${caso.familiaCorrecta} › ${caso.descriptorCorrecto}`;
+            } else {
+                hostSampleAnswer.classList.add("hidden");
+            }
+        }
+    }
+}
+
+function iniciarTemporizadorRonda(startedAt, durationSec) {
+    if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+    const actualizarReloj = () => {
+        const transcurrido = Math.floor((Date.now() - startedAt) / 1000);
+        const restante = Math.max(0, durationSec - transcurrido);
+        liveTimerDisplay.textContent = `${restante}s`;
+        if (restante <= 0 && liveSubmittedRound !== currentRoomState?.roundIndex) {
+            liveSubmitAnswerBtn.disabled = true;
+            liveQuestionCard.classList.add("hidden");
+            liveRoundResultCard.classList.remove("hidden");
+            liveRoundStatus.textContent = "Tiempo Agotado";
+            liveRoundDetail.textContent = "Se terminó el tiempo para esta muestra. Espera la siguiente ronda.";
+        }
+    };
+
+    actualizarReloj();
+    liveTimerInterval = setInterval(actualizarReloj, 500);
+}
+
+function renderizarVistaJugador(data) {
+    const me = (data.players && data.players[playerId]) || { score: 0 };
+    liveMyScore.textContent = String(me.score || 0);
+
+    const roundIdx = data.roundIndex ?? -1;
+    if (data.status === "lobby" || roundIdx < 0) {
+        liveWaitingCard.classList.remove("hidden");
+        liveQuestionCard.classList.add("hidden");
+        liveRoundResultCard.classList.add("hidden");
+        return;
+    }
+
+    if (liveSubmittedRound === roundIdx) {
+        liveWaitingCard.classList.add("hidden");
+        liveQuestionCard.classList.add("hidden");
+        liveRoundResultCard.classList.remove("hidden");
+        return;
+    }
+
+    const caso = CASOS_ENOLOGIA.find((c) => c.id === data.caseIds[roundIdx]);
+    if (!caso) return;
+
+    liveWaitingCard.classList.add("hidden");
+    liveRoundResultCard.classList.add("hidden");
+    liveQuestionCard.classList.remove("hidden");
+
+    liveSampleBadge.textContent = `Muestra ${roundIdx + 1} / ${data.caseIds.length}`;
+    liveSampleTitle.textContent = caso.titulo;
+    liveSampleDesc.textContent = caso.descripcion;
+
+    iniciarTemporizadorRonda(data.roundStartedAt || Date.now(), data.roundDuration || LIVE_ROUND_SECONDS);
+    resetearArbolVivo();
+}
+
+function resetearArbolVivo() {
+    liveMacro = null;
+    liveFamily = null;
+    liveSubfamily = null;
+    liveDescriptor = null;
+    liveSubmitAnswerBtn.disabled = true;
+
+    liveLine2.classList.add("hidden");
+    liveL2Container.classList.add("hidden");
+    liveLine3.classList.add("hidden");
+    liveL3Container.classList.add("hidden");
+    liveL2Options.innerHTML = "";
+    liveL3Options.innerHTML = "";
+    liveL1Options.innerHTML = "";
+
+    mezclarArreglo(Object.keys(JERARQUIA_AROMAS)).forEach((macro) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option-node";
+        btn.textContent = macro;
+        btn.onclick = () => {
+            liveMacro = macro;
+            liveFamily = null;
+            liveSubfamily = null;
+            liveDescriptor = null;
+            liveSubmitAnswerBtn.disabled = true;
+
+            liveL1Options.innerHTML = "";
+            const fixed = document.createElement("div");
+            fixed.className = "option-node selected-branch";
+            fixed.style.cursor = "pointer";
+            fixed.innerHTML = `<span>${macro}</span><span style="font-size:0.68rem; opacity:0.8;">(Toca para cambiar)</span>`;
+            fixed.onclick = () => resetearArbolVivo();
+            liveL1Options.appendChild(fixed);
+
+            liveLine2.classList.remove("hidden");
+            liveL2Container.classList.remove("hidden");
+            liveLine3.classList.add("hidden");
+            liveL3Container.classList.add("hidden");
+            renderLiveNivel2();
+        };
+        liveL1Options.appendChild(btn);
+    });
+}
+
+function renderLiveNivel2() {
+    liveL2Options.innerHTML = "";
+    const nodoMacro = JERARQUIA_AROMAS[liveMacro] || {};
+    mezclarArreglo(Object.keys(nodoMacro)).forEach((fam) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option-node";
+        btn.textContent = fam;
+        btn.onclick = () => {
+            liveFamily = fam;
+            liveSubfamily = null;
+            liveDescriptor = null;
+            liveSubmitAnswerBtn.disabled = true;
+
+            liveL2Options.innerHTML = "";
+            const fixed = document.createElement("div");
+            fixed.className = "option-node selected-branch";
+            fixed.style.cursor = "pointer";
+            fixed.innerHTML = `<span>${fam}</span><span style="font-size:0.68rem; opacity:0.8;">(Toca para cambiar)</span>`;
+            fixed.onclick = () => {
+                liveFamily = null;
+                liveSubfamily = null;
+                liveDescriptor = null;
+                liveSubmitAnswerBtn.disabled = true;
+                liveLine3.classList.add("hidden");
+                liveL3Container.classList.add("hidden");
+                renderLiveNivel2();
+            };
+            liveL2Options.appendChild(fixed);
+
+            liveLine3.classList.remove("hidden");
+            liveL3Container.classList.remove("hidden");
+            renderLiveNivel3(nodoMacro[fam]);
+        };
+        liveL2Options.appendChild(btn);
+    });
+}
+
+function renderLiveNivel3(nodoFamilia) {
+    liveL3Options.innerHTML = "";
+    liveDescriptor = null;
+    liveSubmitAnswerBtn.disabled = true;
+
+    if (Array.isArray(nodoFamilia)) {
+        liveL3Label.textContent = "3. Descriptor Específico";
+        mezclarArreglo(nodoFamilia).forEach((desc) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "option-node";
+            btn.textContent = desc;
+            btn.onclick = () => {
+                liveDescriptor = desc;
+                liveL3Options.querySelectorAll(".option-node").forEach((b) => b.classList.remove("selected-branch"));
+                btn.classList.add("selected-branch");
+                liveSubmitAnswerBtn.disabled = false;
+            };
+            liveL3Options.appendChild(btn);
+        });
+        return;
+    }
+
+    liveL3Label.textContent = "3. Subfamilia y Descriptor";
+    mezclarArreglo(Object.keys(nodoFamilia)).forEach((sub) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "option-node";
+        btn.textContent = sub;
+        btn.onclick = () => {
+            liveSubfamily = sub;
+            liveDescriptor = null;
+            liveSubmitAnswerBtn.disabled = true;
+
+            liveL3Options.innerHTML = "";
+            const fixedSub = document.createElement("div");
+            fixedSub.className = "option-node selected-branch";
+            fixedSub.style.cursor = "pointer";
+            fixedSub.innerHTML = `<span>${sub}</span><span style="font-size:0.68rem; opacity:0.8;">(Toca para cambiar)</span>`;
+            fixedSub.onclick = () => renderLiveNivel3(nodoFamilia);
+            liveL3Options.appendChild(fixedSub);
+
+            const wrap = document.createElement("div");
+            wrap.className = "options-branch-grid";
+            wrap.style.marginTop = "12px";
+
+            mezclarArreglo(nodoFamilia[sub] || []).forEach((desc) => {
+                const dBtn = document.createElement("button");
+                dBtn.type = "button";
+                dBtn.className = "option-node";
+                dBtn.textContent = desc;
+                dBtn.onclick = () => {
+                    liveDescriptor = desc;
+                    wrap.querySelectorAll(".option-node").forEach((b) => b.classList.remove("selected-branch"));
+                    dBtn.classList.add("selected-branch");
+                    liveSubmitAnswerBtn.disabled = false;
+                };
+                wrap.appendChild(dBtn);
+            });
+
+            liveL3Options.appendChild(wrap);
+        };
+        liveL3Options.appendChild(btn);
+    });
+}
+
+function mostrarRankingSala(data) {
+    if (liveTimerInterval) {
+        clearInterval(liveTimerInterval);
+        liveTimerInterval = null;
+    }
+
+    liveHostView.classList.add("hidden");
+    livePlayerView.classList.add("hidden");
+    liveLeaderboardView.classList.remove("hidden");
+
+    const players = Object.values(data.players || {}).sort((a, b) => {
+        if ((b.score || 0) !== (a.score || 0)) return (b.score || 0) - (a.score || 0);
+        if ((b.correctCount || 0) !== (a.correctCount || 0)) return (b.correctCount || 0) - (a.correctCount || 0);
+        return (a.totalTimeSec || 9999) - (b.totalTimeSec || 9999);
+    });
+
+    if (players.length === 0) {
+        liveLeaderboardList.innerHTML = `<p class="perception-subtle">No hubo estudiantes registrados en esta partida.</p>`;
+        return;
+    }
+
+    liveLeaderboardList.innerHTML = players
+        .map((p, idx) => {
+            const medalla = idx === 0 ? "1°" : idx === 1 ? "2°" : idx === 2 ? "3°" : `#${idx + 1}`;
+            return `
+                <div class="leaderboard-row ${idx === 0 ? "top-one" : ""}">
+                    <div class="leaderboard-left">
+                        <span class="leaderboard-pos">${medalla}</span>
+                        <div>
+                            <strong>${p.name}</strong>
+                            <div class="perception-subtle">${p.correctCount || 0} aciertos · ${(p.totalTimeSec || 0).toFixed(1)}s</div>
+                        </div>
+                    </div>
+                    <span class="leaderboard-pts">${p.score || 0} pts</span>
+                </div>
+            `;
+        })
+        .join("");
 }
 
 function configurarEventosGlobales() {
