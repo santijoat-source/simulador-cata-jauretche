@@ -126,7 +126,7 @@
         <section id="game-container" class="fullscreen-section hidden">
             <div class="sample-clean-header">
                 <div class="sample-badges">
-                    <span id="sample-badge" class="pill-tag">Muestra #1</span>
+                    <span id="sample-badge" class="pill-tag">Muestra 1</span>
                     <span id="student-tag-aroma" class="student-session-badge">Estudiante: -</span>
                     <span id="sample-perception" class="perception-subtle">Percepción Olfativa</span>
                 </div>
@@ -167,7 +167,8 @@
                 </div>
 
                 <div class="confirm-bar">
-                    <button id="verify-btn" class="primary-pill-btn confirm-btn" disabled>Verificar Selección ➔</button>
+                    <button id="reset-route-btn" type="button" class="secondary-pill-btn">Reiniciar Ruta</button>
+                    <button id="verify-btn" type="button" class="primary-pill-btn confirm-btn" disabled>Verificar Selección ➔</button>
                 </div>
             </div>
         </section>
@@ -176,7 +177,7 @@
         <section id="visual-container" class="fullscreen-section hidden">
             <div class="sample-clean-header">
                 <div class="sample-badges">
-                    <span id="vis-badge" class="pill-tag">Fase Visual #1</span>
+                    <span id="vis-badge" class="pill-tag">Fase Visual 1</span>
                     <span id="student-tag-vis" class="student-session-badge">Estudiante: -</span>
                     <span class="perception-subtle">Análisis Cromático</span>
                 </div>
@@ -200,19 +201,14 @@
                             </clipPath>
                         </defs>
 
-                        <!-- Líquido dentro del cáliz -->
                         <g clip-path="url(#bowl-clip)">
                             <rect x="30" y="76" width="120" height="80" fill="url(#wine-gradient)" class="wine-liquid-fill"/>
-                            <!-- Superficie / Menisco -->
                             <ellipse cx="90" cy="76" rx="51" ry="7" fill="url(#wine-gradient)" opacity="0.88"/>
                             <ellipse cx="90" cy="76" rx="51" ry="7" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
                         </g>
 
-                        <!-- Contorno de Copa ISO -->
                         <path d="M44 22 H136 L142 84 C144 126 118 148 90 148 C62 148 36 126 38 84 Z" stroke="var(--border-active)" stroke-width="2.2"/>
-                        <!-- Reflejo de cristal -->
                         <path d="M49 32 L45 82 C44 106 54 124 67 134" stroke="rgba(255,255,255,0.22)" stroke-width="2" stroke-linecap="round"/>
-                        <!-- Tallo y Base -->
                         <line x1="90" y1="148" x2="90" y2="208" stroke="var(--border-active)" stroke-width="2.4"/>
                         <ellipse cx="90" cy="210" rx="38" ry="6" stroke="var(--border-active)" stroke-width="2.2"/>
                     </svg>
@@ -230,7 +226,7 @@
                 </div>
 
                 <div class="confirm-bar">
-                    <button id="verify-vis-btn" class="primary-pill-btn confirm-btn" disabled>Verificar Análisis Visual ➔</button>
+                    <button id="verify-vis-btn" type="button" class="primary-pill-btn confirm-btn" disabled>Verificar Análisis Visual ➔</button>
                 </div>
             </div>
         </section>
@@ -258,11 +254,10 @@
                 </div>
             </div>
 
-            <!-- Desglose Pedagógico por Categoría -->
             <div id="performance-breakdown" class="breakdown-panel hidden"></div>
 
             <div class="hero-cta-group" style="margin-top: 36px;">
-                <button id="restart-menu-btn" class="primary-pill-btn">Volver al Inicio</button>
+                <button id="restart-menu-btn" type="button" class="primary-pill-btn">Volver al Inicio</button>
             </div>
         </section>
     </main>
@@ -273,7 +268,7 @@
             <h3>Identificación del Estudiante</h3>
             <p id="student-modal-prompt" style="text-align: center; margin-bottom: 16px;">Ingresa tu Nombre y Apellido para registrar tu práctica.</p>
             <input type="text" id="student-name-input" class="student-input-field" placeholder="Ej: Nombre y Apellido" autocomplete="off">
-            <button id="start-session-btn" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 16px;">Comenzar Práctica ➔</button>
+            <button id="start-session-btn" type="button" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 16px;">Comenzar Práctica ➔</button>
         </div>
     </div>
 
@@ -286,7 +281,7 @@
             </div>
             <p id="feedback-text"></p>
             <div id="feedback-extra" class="feedback-extra-box hidden"></div>
-            <button id="next-btn" class="primary-pill-btn" style="width: 100%; justify-content: center;">Siguiente Muestra ➔</button>
+            <button id="next-btn" type="button" class="primary-pill-btn" style="width: 100%; justify-content: center;">Siguiente Muestra ➔</button>
             <span class="keyboard-hint">Atajo: presiona Enter para continuar</span>
         </div>
     </div>
@@ -294,7 +289,7 @@
     <!-- Modal Rueda de Aromas -->
     <div id="wheel-modal" class="modal-overlay hidden">
         <div class="modal-content wheel-box">
-            <button id="close-wheel-btn" class="close-btn">&times;</button>
+            <button id="close-wheel-btn" type="button" class="close-btn">&times;</button>
             <h3>Rueda de Aromas del Vino</h3>
             <div class="img-wrapper">
                 <img src="assets/rueda_aromaster.jpg" alt="Rueda de Aromas">
@@ -305,7 +300,7 @@
     <!-- Modal Acerca de -->
     <div id="about-modal" class="modal-overlay hidden">
         <div class="modal-content feedback-box">
-            <button id="close-about-btn" class="close-btn">&times;</button>
+            <button id="close-about-btn" type="button" class="close-btn">&times;</button>
             <h3>Acerca del Simulador Enológico</h3>
             <p style="text-align: left; margin-top: 14px;">
                 Recurso didáctico diseñado para el entrenamiento en análisis sensorial de vinos. Organiza la clasificación aromática según la Rueda de Aromas mediante exploración escalonada, promoviendo la observación metódica y el vocabulario técnico.

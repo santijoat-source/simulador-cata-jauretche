@@ -127,6 +127,7 @@ const containerL3 = document.getElementById("container-level-3");
 const labelL3 = document.getElementById("label-l3");
 const level3Options = document.getElementById("level-3-options");
 
+const resetRouteBtn = document.getElementById("reset-route-btn");
 const verifyBtn = document.getElementById("verify-btn");
 
 const sampleBadge = document.getElementById("sample-badge");
@@ -358,6 +359,8 @@ function resetearNivelesInferiores(desdeNivel) {
 }
 
 function cargarCasoAroma() {
+    feedbackModal.classList.add("hidden");
+
     const caso = sessionCases[casoActualIndex];
     selectedMacro = null;
     selectedFamily = null;
@@ -373,13 +376,20 @@ function cargarCasoAroma() {
     caseCounter.textContent = `${casoActualIndex + 1} / ${sessionCases.length}`;
     rootNodeTitle.textContent = caso.titulo;
 
-    feedbackModal.classList.add("hidden");
     line1.classList.remove("hidden");
     containerL1.classList.remove("hidden");
     resetearNivelesInferiores(2);
 
     renderNivel1(caso);
 }
+
+resetRouteBtn.addEventListener("click", () => {
+    const caso = sessionCases[casoActualIndex];
+    if (!caso) return;
+    selectedMacro = null;
+    resetearNivelesInferiores(2);
+    renderNivel1(caso);
+});
 
 function renderNivel1(caso) {
     level1Options.innerHTML = "";
@@ -578,6 +588,8 @@ verifyBtn.addEventListener("click", () => {
 
 // --- MÓDULO VISUAL ---
 function cargarCasoVisual() {
+    feedbackModal.classList.add("hidden");
+
     const caso = sessionCases[casoActualIndex];
     selectedCapa = null;
     selectedTono = null;

@@ -283,6 +283,24 @@ body {
     transform: none;
 }
 
+.secondary-pill-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border-subtle);
+    padding: 16px 26px;
+    border-radius: var(--radius-pill);
+    font-size: 0.98rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.secondary-pill-btn:hover {
+    color: var(--text-main);
+    border-color: var(--border-active);
+    background: rgba(82, 43, 91, 0.2);
+}
+
 /* SELECTOR DE MODOS */
 .section-header-clean {
     margin-bottom: 42px;
@@ -544,6 +562,9 @@ body {
     margin-top: 32px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
     width: 100%;
 }
 
@@ -786,7 +807,7 @@ body {
     .main-viewport {
         padding: 12px 10px 40px 10px;
     }
-    .tree-node, .option-node, .confirm-btn, .root-node {
+    .tree-node, .option-node, .confirm-btn, .secondary-pill-btn, .root-node {
         max-width: 100%;
         min-width: 100%;
         font-size: 0.98rem;

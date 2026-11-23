@@ -144,5 +144,16 @@ const CASOS_VISUALES = [
         colorRimHex: "#b84a27",
         explicacion: "Con la guarda, los antocianos monoméricos reaccionan con taninos y otros compuestos formando pigmentos poliméricos más estables, lo que modifica progresivamente el matiz hacia tonos rubí, ladrillo o teja en el ribete.",
         datoCurioso: "Un ribete con tendencia teja o anaranjada en un tinto de guarda indica evolución en el tiempo, pero siempre debe interpretarse junto con la fase olfativa y gustativa: un color evolucionado con aromas frescos y equilibrados es propio de la crianza, mientras que un tono apagado con notas oxidativas marca desgaste."
+    },
+    {
+        id: 4,
+        titulo: "Semillón de Guarda",
+        descripcion: "Vino blanco con evolución marcada y reflejos cálidos en el halo exterior.",
+        capaCorrecta: "Capa Media",
+        tonoCorrecto: "Dorado",
+        colorCoreHex: "#d8a838",
+        colorRimHex: "#f0cb69",
+        explicacion: "El tono dorado en un blanco con crianza o evolución refleja la transición cromática natural desde matices verdosos o pajizos hacia tonos más profundos y cálidos, sin perder limpidez ni brillo.",
+        datoCurioso: "En vinos blancos con paso por roble o guarda prolongada, la evolución del color debe ir acompañada de coherencia olfativa y acidez sostenida; un dorado brillante y limpio es muy distinto de un ámbar mate u oxidado."
     }
 ];
