@@ -250,20 +250,22 @@
             <div id="live-lobby" class="live-lobby-box">
                 <span class="pill-tag">COMPETENCIA EN TIEMPO REAL</span>
                 <h2 class="section-title-large" style="margin-top: 10px;">Sala de Cata en Vivo</h2>
-                <p class="hero-subtitle">Crea una sala como docente para controlar el ritmo de la clase o ingresá con un código para competir.</p>
+                <p class="hero-subtitle">Crea una sala como docente para controlar el ritmo de la clase o ingresá con un código vigente y tu nombre.</p>
 
                 <div class="live-roles-grid">
                     <div class="live-role-card">
-                        <h3>Docente / Moderador</h3>
+                        <h3>Crear Sala (Docente)</h3>
                         <p>Genera un código de sala, visualiza los estudiantes conectados y avanza muestra por muestra.</p>
                         <button id="create-live-room-btn" type="button" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 14px;">Crear Sala ➔</button>
                     </div>
 
                     <div class="live-role-card">
-                        <h3>Unirse como Estudiante</h3>
-                        <p>Ingresá el código de 6 caracteres que muestra la pantalla docente.</p>
-                        <input type="text" id="live-room-code-input" class="student-input-field" placeholder="Ej: CATA48" maxlength="8" style="text-transform: uppercase;">
-                        <button id="join-live-room-btn" type="button" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 8px;">Entrar a la Sala ➔</button>
+                        <h3>Unirse a una Sala (Estudiante)</h3>
+                        <p>Completá el código de sala y tu nombre y apellido directamente en este panel.</p>
+                        <input type="text" id="live-room-code-input" class="student-input-field" placeholder="Código de sala (Ej: CATA48)" maxlength="8" autocomplete="off" style="text-transform: uppercase;">
+                        <input type="text" id="live-player-name-input" class="student-input-field" placeholder="Nombre y Apellido" autocomplete="off">
+                        <p id="live-join-error" class="live-error-text hidden"></p>
+                        <button id="join-live-room-btn" type="button" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 8px;">Unirse a la Sala ➔</button>
                     </div>
                 </div>
             </div>
@@ -306,9 +308,9 @@
                 </div>
 
                 <div class="confirm-bar">
-                    <button id="host-next-round-btn" type="button" class="primary-pill-btn">Iniciar / Siguiente Muestra ➔</button>
-                    <button id="host-reveal-btn" type="button" class="secondary-pill-btn hidden">Revelar Respuesta</button>
-                    <button id="host-finish-btn" type="button" class="secondary-pill-btn">Finalizar y Ver Ranking</button>
+                    <button id="host-next-round-btn" type="button" class="primary-pill-btn">Iniciar Muestra ➔</button>
+                    <button id="host-reveal-btn" type="button" class="secondary-pill-btn hidden">Mostrar Respuesta</button>
+                    <button id="host-finish-btn" type="button" class="secondary-pill-btn">Finalizar</button>
                 </div>
             </div>
 

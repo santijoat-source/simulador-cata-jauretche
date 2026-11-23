@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebas
 import {
     getDatabase,
     ref,
+    get,
     set,
     update,
     onValue,
@@ -190,6 +191,8 @@ const verifyVisBtn = document.getElementById("verify-vis-btn");
 const liveLobby = document.getElementById("live-lobby");
 const createLiveRoomBtn = document.getElementById("create-live-room-btn");
 const liveRoomCodeInput = document.getElementById("live-room-code-input");
+const livePlayerNameInput = document.getElementById("live-player-name-input");
+const liveJoinError = document.getElementById("live-join-error");
 const joinLiveRoomBtn = document.getElementById("join-live-room-btn");
 
 const liveHostView = document.getElementById("live-host-view");
@@ -323,10 +326,15 @@ function configurarNavegacion() {
                 ocultarTodasLasPantallas();
                 statsContainer.classList.add("hidden");
                 progressWrapper.classList.add("hidden");
+                liveJoinError.classList.add("hidden");
+                liveJoinError.textContent = "";
                 liveLobby.classList.remove("hidden");
                 liveHostView.classList.add("hidden");
                 livePlayerView.classList.add("hidden");
                 liveLeaderboardView.classList.add("hidden");
+                liveQuestionPreview.classList.add("hidden");
+                hostRevealBtn.classList.add("hidden");
+                hostNextRoundBtn.textContent = "Iniciar Muestra ➔";
                 liveContainer.classList.remove("hidden");
                 return;
             }
@@ -908,6 +916,16 @@ function generarCodigoSala() {
     return code;
 }
 
+function mostrarErrorUnion(mensaje) {
+    liveJoinError.textContent = mensaje;
+    liveJoinError.classList.remove("hidden");
+}
+
+function limpiarErrorUnion() {
+    liveJoinError.textContent = "";
+    liveJoinError.classList.add("hidden");
+}
+
 function calcularPuntosKahoot(esCorrecta, tiempoTranscurridoSeg, tiempoLimiteSeg) {
     if (!esCorrecta) return 0;
     const restante = Math.max(0, tiempoLimiteSeg - tiempoTranscurridoSeg);
@@ -917,6 +935,7 @@ function calcularPuntosKahoot(esCorrecta, tiempoTranscurridoSeg, tiempoLimiteSeg
 
 function configurarSalaEnVivo() {
     createLiveRoomBtn.addEventListener("click", async () => {
+        limpiarErrorUnion();
         const codigo = generarCodigoSala();
         const baraja = mezclarArreglo(CASOS_ENOLOGIA).map((c) => c.id);
         activeRoomCode = codigo;
@@ -938,31 +957,58 @@ function configurarSalaEnVivo() {
     });
 
     joinLiveRoomBtn.addEventListener("click", async () => {
+        limpiarErrorUnion();
         const codigo = liveRoomCodeInput.value.trim().toUpperCase();
+        const nombre = livePlayerNameInput.value.trim();
+
         if (!codigo) {
-            alert("Ingresa el código de la sala.");
+            mostrarErrorUnion("Ingresá el código de la sala.");
+            liveRoomCodeInput.focus();
             return;
         }
-        const nombre = prompt("Ingresa tu Nombre y Apellido para competir:");
-        if (!nombre || !nombre.trim()) {
-            alert("Debes ingresar tu Nombre y Apellido.");
+        if (!nombre) {
+            mostrarErrorUnion("Ingresá tu Nombre y Apellido para competir.");
+            livePlayerNameInput.focus();
             return;
         }
 
-        currentStudentName = nombre.trim();
-        playerId = `p_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-        activeRoomCode = codigo;
-        isRoomHost = false;
+        joinLiveRoomBtn.disabled = true;
+        joinLiveRoomBtn.textContent = "Verificando sala...";
 
-        await set(ref(db, `rooms/${codigo}/players/${playerId}`), {
-            name: currentStudentName,
-            score: 0,
-            correctCount: 0,
-            totalTimeSec: 0,
-            lastRoundAnswered: -1
-        });
+        try {
+            // Validación estricta: verificar que la sala exista y no esté finalizada
+            const snapshot = await get(ref(db, `rooms/${codigo}`));
+            if (!snapshot.exists()) {
+                mostrarErrorUnion(`La sala "${codigo}" no existe. Verificá el código con la profesora.`);
+                return;
+            }
 
-        suscribirSala(codigo, false);
+            const roomData = snapshot.val();
+            if (roomData.status === "finished") {
+                mostrarErrorUnion(`La sala "${codigo}" ya finalizó.`);
+                return;
+            }
+
+            currentStudentName = nombre;
+            playerId = `p_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+            activeRoomCode = codigo;
+            isRoomHost = false;
+
+            await set(ref(db, `rooms/${codigo}/players/${playerId}`), {
+                name: currentStudentName,
+                score: 0,
+                correctCount: 0,
+                totalTimeSec: 0,
+                lastRoundAnswered: -1
+            });
+
+            suscribirSala(codigo, false);
+        } catch (err) {
+            mostrarErrorUnion("No se pudo conectar con la sala. Revisá tu conexión e intentá de nuevo.");
+        } finally {
+            joinLiveRoomBtn.disabled = false;
+            joinLiveRoomBtn.textContent = "Unirse a la Sala ➔";
+        }
     });
 
     hostNextRoundBtn.addEventListener("click", async () => {
@@ -1066,6 +1112,7 @@ function renderizarVistaDocente(data) {
 
     hostPlayerCount.textContent = String(players.length);
     hostRoundIndicator.textContent = `${Math.max(0, roundIdx + 1)} / ${totalRounds}`;
+    hostNextRoundBtn.textContent = roundIdx < 0 ? "Iniciar Muestra ➔" : "Siguiente Muestra ➔";
 
     const answered = players.filter((p) => p.lastRoundAnswered === roundIdx && roundIdx >= 0).length;
     hostAnsweredCount.textContent = `${answered} / ${players.length}`;
