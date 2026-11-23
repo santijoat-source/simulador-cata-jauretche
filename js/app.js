@@ -323,6 +323,7 @@ function configurarNavegacion() {
         card.addEventListener("click", () => {
             pendingMode = card.getAttribute("data-mode");
             if (pendingMode === "live") {
+                limpiarSuscripcionSala();
                 ocultarTodasLasPantallas();
                 statsContainer.classList.add("hidden");
                 progressWrapper.classList.add("hidden");
@@ -332,9 +333,9 @@ function configurarNavegacion() {
                 liveHostView.classList.add("hidden");
                 livePlayerView.classList.add("hidden");
                 liveLeaderboardView.classList.add("hidden");
-                liveQuestionPreview.classList.add("hidden");
-                hostRevealBtn.classList.add("hidden");
-                hostNextRoundBtn.textContent = "Iniciar Muestra ➔";
+                if (hostQuestionPreview) hostQuestionPreview.classList.add("hidden");
+                if (hostRevealBtn) hostRevealBtn.classList.add("hidden");
+                if (hostNextRoundBtn) hostNextRoundBtn.textContent = "Iniciar Muestra ➔";
                 liveContainer.classList.remove("hidden");
                 return;
             }
@@ -943,7 +944,7 @@ function configurarSalaEnVivo() {
 
         const roomData = {
             code: codigo,
-            status: "lobby", // lobby | question | finished
+            status: "lobby",
             roundIndex: -1,
             roundStartedAt: 0,
             roundDuration: LIVE_ROUND_SECONDS,
@@ -976,7 +977,6 @@ function configurarSalaEnVivo() {
         joinLiveRoomBtn.textContent = "Verificando sala...";
 
         try {
-            // Validación estricta: verificar que la sala exista y no esté finalizada
             const snapshot = await get(ref(db, `rooms/${codigo}`));
             if (!snapshot.exists()) {
                 mostrarErrorUnion(`La sala "${codigo}" no existe. Verificá el código con la profesora.`);
