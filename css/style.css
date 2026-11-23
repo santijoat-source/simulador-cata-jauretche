@@ -287,9 +287,9 @@ body {
     background: transparent;
     color: var(--text-muted);
     border: 1.5px solid var(--border-subtle);
-    padding: 16px 26px;
+    padding: 14px 24px;
     border-radius: var(--radius-pill);
-    font-size: 0.98rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -794,7 +794,7 @@ body {
     box-shadow: 0 0 15px rgba(223, 182, 178, 0.25);
 }
 
-/* RESULTADOS FINALES Y DESGLOSE */
+/* RESULTADOS FINALES, DESGLOSE Y AUDITORÍA DOCENTE */
 .sync-badge {
     font-size: 0.92rem;
     color: var(--highlight);
@@ -836,10 +836,11 @@ body {
     color: var(--text-main);
 }
 
-.breakdown-panel {
+.breakdown-panel,
+.teacher-panel {
     width: 100%;
-    max-width: 620px;
-    margin-top: 30px;
+    max-width: 760px;
+    margin-top: 26px;
     padding: 22px 24px;
     border-radius: 24px;
     border: 1px solid var(--border-subtle);
@@ -847,11 +848,21 @@ body {
     text-align: left;
 }
 
-.breakdown-panel h4 {
-    font-size: 0.82rem;
+.breakdown-panel h4,
+.teacher-panel h4 {
+    font-size: 0.85rem;
     text-transform: uppercase;
-    letter-spacing: 1.3px;
+    letter-spacing: 1.2px;
     color: var(--highlight);
+    margin-bottom: 12px;
+}
+
+.teacher-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 14px;
 }
 
@@ -875,6 +886,78 @@ body {
 .breakdown-score {
     font-weight: 700;
     color: var(--highlight);
+}
+
+.teacher-records-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.teacher-student-card {
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(25, 0, 25, 0.34);
+}
+
+.teacher-student-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.teacher-score-badge {
+    font-weight: 800;
+    color: var(--highlight);
+    background: rgba(223, 182, 178, 0.14);
+    border: 1px solid var(--border-active);
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.9rem;
+}
+
+.teacher-adjust-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.teacher-mini-btn {
+    background: var(--bg-element);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.teacher-mini-btn:hover {
+    border-color: var(--border-active);
+    background: var(--bg-hover);
+}
+
+.teacher-step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.teacher-step-item {
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(43, 18, 76, 0.35);
+    border: 1px solid var(--border-subtle);
+    font-size: 0.86rem;
+    line-height: 1.45;
 }
 
 /* MODALES */

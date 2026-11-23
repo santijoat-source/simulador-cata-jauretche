@@ -79,8 +79,11 @@ const JERARQUIA_AROMAS = {
 };
 
 const STORAGE_KEY = "cata_resultados_estudiantes_v1";
+const EXAM_RECORDS_KEY = "cata_examen_recorridos_v1";
 const CLOUD_RESULTS_URL = "https://script.google.com/macros/s/AKfycbxLKtoA325seEtpA0iI00Dy2ZbB_BtVU2id3MVxfm_XR0a9DFREHkLUFHkN-1_lvXao1A/exec";
 const LIVE_ROUND_SECONDS = 30;
+const EXAM_SAMPLE_COUNT = 10;
+const CLAVE_DOCENTE = "DOCENTE2026";
 
 // Estado individual
 let score = 0;
@@ -88,10 +91,11 @@ let streak = 0;
 let correctAnswersCount = 0;
 let currentMode = "aroma";
 let pendingMode = null;
-let currentStudentName = "Estudiante";
+let currentStudentName = "";
 let casoActualIndex = 0;
 let sessionCases = [];
 let categoryStats = {};
+let examAttemptSteps = [];
 
 let selectedMacro = null;
 let selectedFamily = null;
@@ -214,7 +218,6 @@ const playerRoomBadge = document.getElementById("player-room-badge");
 const liveTimerDisplay = document.getElementById("live-timer-display");
 const liveMyScore = document.getElementById("live-my-score");
 const liveWaitingCard = document.getElementById("live-waiting-card");
-const liveWaitingMessage = document.getElementById("live-waiting-message");
 const liveQuestionCard = document.getElementById("live-question-card");
 const liveSampleBadge = document.getElementById("live-sample-badge");
 const liveSampleTitle = document.getElementById("live-sample-title");
@@ -244,11 +247,16 @@ const feedbackText = document.getElementById("feedback-text");
 const feedbackExtra = document.getElementById("feedback-extra");
 const nextBtn = document.getElementById("next-btn");
 
+const endScreenTitle = document.getElementById("end-screen-title");
 const syncStatusText = document.getElementById("sync-status-text");
 const finalScoreEl = document.getElementById("final-score");
 const finalAccuracyEl = document.getElementById("final-accuracy");
 const finalRankEl = document.getElementById("final-rank");
 const performanceBreakdownEl = document.getElementById("performance-breakdown");
+
+const openTeacherAuditBtn = document.getElementById("open-teacher-audit-btn");
+const teacherAuditPanel = document.getElementById("teacher-audit-panel");
+const teacherRecordsList = document.getElementById("teacher-records-list");
 
 const openWheelBtn = document.getElementById("open-wheel-btn");
 const closeWheelBtn = document.getElementById("close-wheel-btn");
@@ -259,6 +267,7 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarNavegacion();
     configurarEventosGlobales();
     configurarSalaEnVivo();
+    configurarAuditoriaDocente();
 });
 
 function configurarTemaSVG() {
@@ -381,6 +390,15 @@ function configurarNavegacion() {
     liveBackHomeBtn.addEventListener("click", irAlInicio);
 }
 
+function obtenerFuenteMuestrasEntrenamiento() {
+    const extra = typeof MUESTRAS_ENTRENAMIENTO_EXTRA !== "undefined" ? MUESTRAS_ENTRENAMIENTO_EXTRA : [];
+    return [...CASOS_ENOLOGIA, ...extra];
+}
+
+function obtenerMuestrasExamen() {
+    return mezclarArreglo(CASOS_ENOLOGIA).slice(0, EXAM_SAMPLE_COUNT);
+}
+
 function actualizarProgreso(indiceActual, totalCasos) {
     const porcentaje = Math.round((indiceActual / totalCasos) * 100);
     progressFill.style.width = `${porcentaje}%`;
@@ -396,7 +414,11 @@ function registrarEstadisticaCategoria(categoria, acerto) {
     }
 }
 
-async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal) {
+function formatearPuntaje(valor) {
+    return Number(valor).toFixed(1);
+}
+
+async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal, pasosExamen = null) {
     const nuevoRegistro = {
         estudiante: currentStudentName,
         modalidad: modalidadNombre,
@@ -408,6 +430,20 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
     const resultadosLocales = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     resultadosLocales.push(nuevoRegistro);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(resultadosLocales));
+
+    if (Array.isArray(pasosExamen)) {
+        const registrosExamen = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
+        registrosExamen.unshift({
+            id: `ex_${Date.now()}`,
+            estudiante: currentStudentName,
+            puntajeBase: Number(puntajeFinal),
+            ajusteDocente: 0,
+            puntajeFinal: Number(puntajeFinal),
+            fecha: new Date().toLocaleString(),
+            pasos: pasosExamen
+        });
+        localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify(registrosExamen));
+    }
 
     if (!CLOUD_RESULTS_URL) {
         syncStatusText.textContent = "Resultado guardado localmente en este dispositivo.";
@@ -434,8 +470,9 @@ function iniciarSesion() {
     correctAnswersCount = 0;
     casoActualIndex = 0;
     categoryStats = {};
+    examAttemptSteps = [];
 
-    scoreDisplay.textContent = "0";
+    scoreDisplay.textContent = currentMode === "examen" ? "0.0" : "0";
     streakDisplay.textContent = "0";
     streakPill.classList.remove("streak-hot");
 
@@ -445,8 +482,8 @@ function iniciarSesion() {
     actualizarProgreso(0, 1);
 
     const sufijoModo = currentMode === "examen" ? " (Examen)" : "";
-    studentTagAroma.textContent = `Estudiante: ${currentStudentName}${sufijoModo}`;
-    studentTagVis.textContent = `Estudiante: ${currentStudentName}${sufijoModo}`;
+    studentTagAroma.textContent = `Nombre y Apellido: ${currentStudentName}${sufijoModo}`;
+    studentTagVis.textContent = `Nombre y Apellido: ${currentStudentName}${sufijoModo}`;
 
     if (currentMode === "examen") {
         openWheelBtn.classList.add("hidden");
@@ -458,8 +495,12 @@ function iniciarSesion() {
         sessionCases = mezclarArreglo(CASOS_VISUALES);
         visualContainer.classList.remove("hidden");
         cargarCasoVisual();
+    } else if (currentMode === "examen") {
+        sessionCases = obtenerMuestrasExamen();
+        gameContainer.classList.remove("hidden");
+        cargarCasoAroma();
     } else {
-        sessionCases = mezclarArreglo(CASOS_ENOLOGIA);
+        sessionCases = mezclarArreglo(obtenerFuenteMuestrasEntrenamiento());
         gameContainer.classList.remove("hidden");
         cargarCasoAroma();
     }
@@ -669,6 +710,19 @@ function renderDescriptoresDirectos(listaDescriptores) {
     });
 }
 
+function determinarTramoError(caso) {
+    if (selectedMacro !== caso.macroCorrecta) {
+        return "Clasificación General (Macro)";
+    }
+    if (selectedFamily !== caso.familiaCorrecta) {
+        return "Familia Aromática";
+    }
+    if (selectedDescriptor !== caso.descriptorCorrecto) {
+        return "Descriptor Específico";
+    }
+    return "Sin error";
+}
+
 function generarDiagnosticoErrorAroma(caso) {
     if (selectedMacro !== caso.macroCorrecta) {
         return `Clasificaste la muestra dentro de "${selectedMacro}", pero su origen sensorial corresponde a "${caso.macroCorrecta}". Recuerda distinguir si el compuesto proviene de la uva (Primario), de la fermentación (Secundario), de la crianza (Terciario) o de una alteración (Defecto).`;
@@ -694,13 +748,55 @@ verifyBtn.addEventListener("click", () => {
         : `${selectedMacro} › ${selectedFamily} › ${selectedDescriptor}`;
 
     const rutaCorrecta = `${caso.macroCorrecta} › ${caso.familiaCorrecta} › ${caso.descriptorCorrecto}`;
+    const tramoError = esExito ? "Ruta completa correcta" : determinarTramoError(caso);
+
+    if (currentMode === "examen") {
+        // Escala de 10 muestras x 1.0 pt = 10.0 pts máximos.
+        // Si acierta Macro y Familia y falla solo en el Descriptor específico, recibe 0.8 pts parciales.
+        let puntosMuestra = 0;
+        if (esExito) {
+            puntosMuestra = 1.0;
+            correctAnswersCount += 1;
+            streak += 1;
+        } else if (selectedMacro === caso.macroCorrecta && selectedFamily === caso.familiaCorrecta) {
+            puntosMuestra = 0.8;
+            streak = 0;
+        } else {
+            puntosMuestra = 0;
+            streak = 0;
+        }
+
+        score = Number((score + puntosMuestra).toFixed(2));
+        examAttemptSteps.push({
+            muestra: caso.titulo,
+            elegida: rutaElegida,
+            esperada: rutaCorrecta,
+            tramoError,
+            puntos: puntosMuestra
+        });
+
+        actualizarMarcadoresSuperiores();
+
+        if (esExito) {
+            mostrarFeedback(true, `Respuesta correcta (+1.0 pt).\n\n${caso.explicacion}`, caso.datoCurioso, "+1.0 pt");
+        } else {
+            const diagnostico = generarDiagnosticoErrorAroma(caso);
+            mostrarFeedback(
+                false,
+                `Puntaje de esta muestra: ${formatearPuntaje(puntosMuestra)} / 1.0 pt\nTramo revisado: ${tramoError}\n\n• Elegiste: ${rutaElegida}\n• Esperado: ${rutaCorrecta}\n\n${diagnostico}`,
+                null,
+                `+${formatearPuntaje(puntosMuestra)} pt`
+            );
+        }
+        return;
+    }
 
     if (esExito) {
         score += 15;
         streak += 1;
         correctAnswersCount += 1;
         actualizarMarcadoresSuperiores();
-        mostrarFeedback(true, `Deducción correcta.\n\n${caso.explicacion}`, caso.datoCurioso);
+        mostrarFeedback(true, `Deducción correcta.\n\n${caso.explicacion}`, caso.datoCurioso, "+15 pts");
     } else {
         streak = 0;
         actualizarMarcadoresSuperiores();
@@ -709,7 +805,8 @@ verifyBtn.addEventListener("click", () => {
         mostrarFeedback(
             false,
             `Discrepancia en el análisis.\n\n• Elegiste: ${rutaElegida}\n• Esperado: ${rutaCorrecta}\n\n${diagnostico}\n\n${caso.explicacion}`,
-            null
+            null,
+            "0 pts"
         );
     }
 });
@@ -783,7 +880,7 @@ verifyVisBtn.addEventListener("click", () => {
         streak += 1;
         correctAnswersCount += 1;
         actualizarMarcadoresSuperiores();
-        mostrarFeedback(true, `Análisis visual correcto.\n\n${caso.explicacion}`, caso.datoCurioso);
+        mostrarFeedback(true, `Análisis visual correcto.\n\n${caso.explicacion}`, caso.datoCurioso, "+15 pts");
     } else {
         streak = 0;
         actualizarMarcadoresSuperiores();
@@ -791,14 +888,15 @@ verifyVisBtn.addEventListener("click", () => {
         mostrarFeedback(
             false,
             `Discrepancia en la fase visual.\n\n• Elegiste: ${selectedCapa} y ${selectedTono}\n• Esperado: ${caso.capaCorrecta} y ${caso.tonoCorrecto}\n\n${caso.explicacion}`,
-            null
+            null,
+            "0 pts"
         );
     }
 });
 
 function actualizarMarcadoresSuperiores() {
-    scoreDisplay.textContent = score;
-    streakDisplay.textContent = streak;
+    scoreDisplay.textContent = currentMode === "examen" ? formatearPuntaje(score) : String(score);
+    streakDisplay.textContent = String(streak);
     if (streak >= 2) {
         streakPill.classList.add("streak-hot");
     } else {
@@ -806,9 +904,13 @@ function actualizarMarcadoresSuperiores() {
     }
 }
 
-function mostrarFeedback(esCorrecto, mensaje, datoCurioso) {
+function mostrarFeedback(esCorrecto, mensaje, datoCurioso, etiquetaPuntos = "") {
     feedbackModal.classList.remove("hidden");
-    feedbackStatus.textContent = esCorrecto ? "Análisis Exitoso (+15 pts)" : "Discrepancia Sensorial";
+    if (currentMode === "examen") {
+        feedbackStatus.textContent = esCorrecto ? `Análisis Correcto (${etiquetaPuntos})` : `Revisión de Muestra (${etiquetaPuntos})`;
+    } else {
+        feedbackStatus.textContent = esCorrecto ? `Análisis Exitoso (${etiquetaPuntos})` : "Discrepancia Sensorial";
+    }
     feedbackText.innerText = mensaje;
 
     if (esCorrecto && streak >= 2) {
@@ -837,15 +939,19 @@ nextBtn.addEventListener("click", () => {
     }
 });
 
-function animarContadorNumerico(elemento, valorFinal, sufijo = "") {
+function animarContadorNumerico(elemento, valorFinal, sufijo = "", decimales = 0) {
     const duracion = 650;
     const inicio = performance.now();
     function actualizar(ahora) {
         const progreso = Math.min((ahora - inicio) / duracion, 1);
-        const valorActual = Math.round(progreso * valorFinal);
-        elemento.textContent = `${valorActual}${sufijo}`;
+        const raw = progreso * valorFinal;
+        const mostrado = decimales > 0 ? raw.toFixed(decimales) : String(Math.round(raw));
+        elemento.textContent = `${mostrado}${sufijo}`;
         if (progreso < 1) {
             requestAnimationFrame(actualizar);
+        } else {
+            const finalStr = decimales > 0 ? Number(valorFinal).toFixed(decimales) : String(Math.round(valorFinal));
+            elemento.textContent = `${finalStr}${sufijo}`;
         }
     }
     requestAnimationFrame(actualizar);
@@ -881,10 +987,33 @@ function mostrarPantallaFinal() {
     ocultarTodasLasPantallas();
     statsContainer.classList.add("hidden");
     openWheelBtn.classList.remove("hidden");
+    teacherAuditPanel.classList.add("hidden");
 
     const totalMuestras = sessionCases.length || 1;
-    const porcentajePrecision = Math.round((correctAnswersCount / totalMuestras) * 100);
 
+    if (currentMode === "examen") {
+        const notaDecimal = Number(score.toFixed(2));
+        const porcentajeNota = Math.min(100, Math.round((notaDecimal / EXAM_SAMPLE_COUNT) * 100));
+        const rangoFinal =
+            notaDecimal >= 8.0
+                ? "Sobresaliente"
+                : notaDecimal >= 7.0
+                ? "Aprobado"
+                : "En Proceso";
+
+        endScreenTitle.textContent = "Evaluación Registrada";
+        guardarResultadoEstudiante("Modo Examen", formatearPuntaje(notaDecimal), rangoFinal, examAttemptSteps);
+
+        animarContadorNumerico(finalScoreEl, notaDecimal, " / 10", 1);
+        animarContadorNumerico(finalAccuracyEl, porcentajeNota, "%", 0);
+        finalRankEl.textContent = rangoFinal;
+        renderizarDesgloseFinal();
+        endScreen.classList.remove("hidden");
+        return;
+    }
+
+    endScreenTitle.textContent = "Resultado Registrado";
+    const porcentajePrecision = Math.round((correctAnswersCount / totalMuestras) * 100);
     const rangoFinal =
         porcentajePrecision >= 80
             ? "Enólogo Master"
@@ -892,17 +1021,107 @@ function mostrarPantallaFinal() {
             ? "Sommelier Avanzado"
             : "Práctica Inicial";
 
-    const modalidadNombre =
-        currentMode === "visual" ? "Fase Visual" : currentMode === "examen" ? "Modo Examen" : "Árbol Olfativo";
-
+    const modalidadNombre = currentMode === "visual" ? "Fase Visual" : "Árbol Olfativo";
     guardarResultadoEstudiante(modalidadNombre, score, rangoFinal);
 
-    animarContadorNumerico(finalScoreEl, score);
-    animarContadorNumerico(finalAccuracyEl, porcentajePrecision, "%");
+    animarContadorNumerico(finalScoreEl, score, "", 0);
+    animarContadorNumerico(finalAccuracyEl, porcentajePrecision, "%", 0);
     finalRankEl.textContent = rangoFinal;
     renderizarDesgloseFinal();
 
     endScreen.classList.remove("hidden");
+}
+
+// ==========================================
+// AUDITORÍA DOCENTE (RECORRIDO Y DECIMALES)
+// ==========================================
+function configurarAuditoriaDocente() {
+    openTeacherAuditBtn.addEventListener("click", () => {
+        if (!teacherAuditPanel.classList.contains("hidden")) {
+            teacherAuditPanel.classList.add("hidden");
+            return;
+        }
+        const claveIngresada = prompt("Ingresá la clave de la profesora para ver los recorridos y ajustes decimales:");
+        if (claveIngresada !== CLAVE_DOCENTE) {
+            alert("Clave incorrecta.");
+            return;
+        }
+        renderizarPanelDocente();
+        teacherAuditPanel.classList.remove("hidden");
+    });
+
+    teacherRecordsList.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-adjust-id]");
+        if (!btn) return;
+        const id = btn.getAttribute("data-adjust-id");
+        const delta = Number(btn.getAttribute("data-delta"));
+        ajustarPuntajeExamen(id, delta);
+    });
+}
+
+function ajustarPuntajeExamen(recordId, delta) {
+    const registros = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
+    const idx = registros.findIndex((r) => r.id === recordId);
+    if (idx === -1) return;
+
+    const reg = registros[idx];
+    const nuevoAjuste = Number(((reg.ajusteDocente || 0) + delta).toFixed(2));
+    const nuevoFinal = Math.max(0, Math.min(10, Number(((reg.puntajeBase || 0) + nuevoAjuste).toFixed(2))));
+
+    reg.ajusteDocente = nuevoAjuste;
+    reg.puntajeFinal = nuevoFinal;
+    registros[idx] = reg;
+
+    localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify(registros));
+    renderizarPanelDocente();
+}
+
+function renderizarPanelDocente() {
+    const registros = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
+    if (registros.length === 0) {
+        teacherRecordsList.innerHTML = `<p class="perception-subtle">Todavía no hay evaluaciones de examen registradas en este dispositivo.</p>`;
+        return;
+    }
+
+    teacherRecordsList.innerHTML = registros
+        .map((reg) => {
+            const stepsHtml = (reg.pasos || [])
+                .map((s, i) => {
+                    return `
+                        <div class="teacher-step-item">
+                            <strong>Muestra ${i + 1}: ${s.muestra}</strong> · <span>${formatearPuntaje(s.puntos)} / 1.0 pt</span><br>
+                            <span>Elegido: ${s.elegida}</span><br>
+                            <span>Esperado: ${s.esperada}</span><br>
+                            <span>Tramo / Diagnóstico: ${s.tramoError}</span>
+                        </div>
+                    `;
+                })
+                .join("");
+
+            const ajusteTexto = reg.ajusteDocente
+                ? ` · Ajuste docente: ${reg.ajusteDocente > 0 ? "+" : ""}${formatearPuntaje(reg.ajusteDocente)}`
+                : "";
+
+            return `
+                <div class="teacher-student-card">
+                    <div class="teacher-student-top">
+                        <div>
+                            <strong>${reg.estudiante}</strong>
+                            <div class="perception-subtle">${reg.fecha}${ajusteTexto}</div>
+                        </div>
+                        <span class="teacher-score-badge">Nota Final: ${formatearPuntaje(reg.puntajeFinal)} / 10.0</span>
+                    </div>
+                    <div class="teacher-adjust-row">
+                        <span class="perception-subtle">Ponderar / Ajustar nota:</span>
+                        <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.2">+0.2</button>
+                        <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.5">+0.5</button>
+                        <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="-0.2">-0.2</button>
+                    </div>
+                    <div class="teacher-step-list">${stepsHtml}</div>
+                </div>
+            `;
+        })
+        .join("");
 }
 
 // ==========================================
