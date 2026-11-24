@@ -5,6 +5,7 @@ import {
     get,
     set,
     update,
+    remove,
     onValue,
     off
 } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
@@ -122,6 +123,7 @@ let liveDescriptor = null;
 // Estado Consola Docente
 let submissionsRef = null;
 let teacherSubmissionsCache = [];
+let pendingAdjustById = {};
 let expandedStudentId = null;
 let logoTapCount = 0;
 let logoTapTimer = null;
@@ -159,7 +161,8 @@ const teacherPinInput = document.getElementById("teacher-pin-input");
 const teacherAuthError = document.getElementById("teacher-auth-error");
 const submitTeacherPinBtn = document.getElementById("submit-teacher-pin-btn");
 const teacherConsoleList = document.getElementById("teacher-console-list");
-const teacherBackHomeBtn = document.getElementById("teacher-back-home-btn");
+const clearAllExamsBtn = document.getElementById("clear-all-exams-btn");
+const teacherBackModesBtn = document.getElementById("teacher-back-modes-btn");
 
 // Otros modales y controles
 const openAboutBtn = document.getElementById("open-about-btn");
@@ -255,7 +258,7 @@ const liveRoundDetail = document.getElementById("live-round-detail");
 
 const liveLeaderboardView = document.getElementById("live-leaderboard-view");
 const liveLeaderboardList = document.getElementById("live-leaderboard-list");
-const liveBackHomeBtn = document.getElementById("live-back-home-btn");
+const liveBackModesBtn = document.getElementById("live-back-modes-btn");
 
 // Feedback y Cierre
 const feedbackModal = document.getElementById("feedback-modal");
@@ -336,12 +339,27 @@ function limpiarSuscripcionSala() {
     liveSubmittedRound = -1;
 }
 
+function irAModosDeCata() {
+    limpiarSuscripcionSala();
+    ocultarTodasLasPantallas();
+    modesScreen.classList.remove("hidden");
+    statsContainer.classList.add("hidden");
+    progressWrapper.classList.add("hidden");
+    openWheelBtn.classList.remove("hidden");
+}
+
+function irAPortadaInicial() {
+    limpiarSuscripcionSala();
+    ocultarTodasLasPantallas();
+    heroScreen.classList.remove("hidden");
+    statsContainer.classList.add("hidden");
+    progressWrapper.classList.add("hidden");
+    openWheelBtn.classList.remove("hidden");
+}
+
 function configurarNavegacion() {
     enterModesBtn.addEventListener("click", () => {
-        ocultarTodasLasPantallas();
-        modesScreen.classList.remove("hidden");
-        statsContainer.classList.add("hidden");
-        progressWrapper.classList.add("hidden");
+        irAModosDeCata();
     });
 
     document.querySelectorAll(".mode-clean-item").forEach((card) => {
@@ -376,6 +394,42 @@ function configurarNavegacion() {
         });
     });
 
+    // Cerrar modal de identificación tocando fuera de la tarjeta
+    nameModal.addEventListener("click", (e) => {
+        if (e.target === nameModal) {
+            nameModal.classList.add("hidden");
+            pendingMode = null;
+        }
+    });
+
+    // Soporte para botón / gesto Atrás del navegador o dispositivo
+    window.addEventListener("popstate", () => {
+        if (!nameModal.classList.contains("hidden")) {
+            nameModal.classList.add("hidden");
+            pendingMode = null;
+            return;
+        }
+        if (!aboutModal.classList.contains("hidden")) {
+            aboutModal.classList.add("hidden");
+            return;
+        }
+        if (!wheelModal.classList.contains("hidden")) {
+            wheelModal.classList.add("hidden");
+            return;
+        }
+        if (!teacherAuthModal.classList.contains("hidden")) {
+            teacherAuthModal.classList.add("hidden");
+            return;
+        }
+        if (!modesScreen.classList.contains("hidden")) {
+            irAPortadaInicial();
+        } else if (!heroScreen.classList.contains("hidden")) {
+            // Ya está en inicio
+        } else {
+            irAModosDeCata();
+        }
+    });
+
     startSessionBtn.addEventListener("click", () => {
         const nombreVal = studentNameInput.value.trim();
         if (!nombreVal) {
@@ -392,16 +446,7 @@ function configurarNavegacion() {
         if (e.key === "Enter") startSessionBtn.click();
     });
 
-    const irAlInicio = () => {
-        limpiarSuscripcionSala();
-        ocultarTodasLasPantallas();
-        heroScreen.classList.remove("hidden");
-        statsContainer.classList.add("hidden");
-        progressWrapper.classList.add("hidden");
-        openWheelBtn.classList.remove("hidden");
-    };
-
-    // 5 toques rápidos en el logo permiten abrir el acceso docente sin exponer botones a los alumnos
+    // Única vía a la portada principal: tocar el título superior izquierdo
     brandLogo.addEventListener("click", () => {
         logoTapCount += 1;
         if (logoTapTimer) clearTimeout(logoTapTimer);
@@ -412,13 +457,13 @@ function configurarNavegacion() {
         }
         logoTapTimer = setTimeout(() => {
             logoTapCount = 0;
-            irAlInicio();
+            irAPortadaInicial();
         }, 650);
     });
 
-    restartMenuBtn.addEventListener("click", irAlInicio);
-    liveBackHomeBtn.addEventListener("click", irAlInicio);
-    teacherBackHomeBtn.addEventListener("click", irAlInicio);
+    restartMenuBtn.addEventListener("click", irAModosDeCata);
+    liveBackModesBtn.addEventListener("click", irAModosDeCata);
+    teacherBackModesBtn.addEventListener("click", irAModosDeCata);
 }
 
 function verificarAccesoDocentePorUrl() {
@@ -464,17 +509,53 @@ function formatearPuntaje(valor) {
     return Number(valor).toFixed(1);
 }
 
+function obtenerFechaYHora24h() {
+    const ahora = new Date();
+    const dia = String(ahora.getDate()).padStart(2, "0");
+    const mes = String(ahora.getMonth() + 1).padStart(2, "0");
+    const anio = ahora.getFullYear();
+    const horas = String(ahora.getHours()).padStart(2, "0");
+    const minutos = String(ahora.getMinutes()).padStart(2, "0");
+    return {
+        fecha: `${dia}/${mes}/${anio}`,
+        hora: `${horas}:${minutos}`
+    };
+}
+
+async function enviarAPlanillaGoogle(payload) {
+    if (!CLOUD_RESULTS_URL) return false;
+    await fetch(CLOUD_RESULTS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+    return true;
+}
+
 async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFinal, pasosExamen = null) {
-    const nuevoRegistro = {
+    const { fecha, hora } = obtenerFechaYHora24h();
+
+    // Payload limpio para Google Sheets (sin rango; fecha y hora en 24 hs HH:MM)
+    const registroPlanilla = {
+        accion: "registro_sesion",
+        estudiante: currentStudentName,
+        modalidad: modalidadNombre,
+        puntaje: puntajeFinal,
+        fecha,
+        hora
+    };
+
+    // El rango queda exclusivamente para la vista del juego
+    const resultadosLocales = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    resultadosLocales.push({
         estudiante: currentStudentName,
         modalidad: modalidadNombre,
         puntaje: puntajeFinal,
         rango: rangoFinal,
-        fecha: new Date().toLocaleString()
-    };
-
-    const resultadosLocales = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    resultadosLocales.push(nuevoRegistro);
+        fecha,
+        hora
+    });
     localStorage.setItem(STORAGE_KEY, JSON.stringify(resultadosLocales));
 
     if (Array.isArray(pasosExamen)) {
@@ -485,7 +566,8 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
             puntajeBase: Number(puntajeFinal),
             ajusteDocente: 0,
             puntajeFinal: Number(puntajeFinal),
-            fecha: new Date().toLocaleString(),
+            fecha,
+            hora,
             pasos: pasosExamen
         };
 
@@ -496,7 +578,7 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
         try {
             await set(ref(db, `examSubmissions/${submissionId}`), submissionData);
         } catch (err) {
-            // Si falla la red, queda guardado localmente en el dispositivo
+            // Queda respaldado localmente
         }
     }
 
@@ -507,12 +589,7 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
 
     syncStatusText.textContent = "Registrando resultado...";
     try {
-        await fetch(CLOUD_RESULTS_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(nuevoRegistro)
-        });
+        await enviarAPlanillaGoogle(registroPlanilla);
         syncStatusText.textContent = "✓ Resultado enviado y registrado correctamente.";
     } catch (error) {
         syncStatusText.textContent = "Guardado en el dispositivo (sin conexión para sincronizar ahora).";
@@ -1092,6 +1169,12 @@ function configurarConsolaDocente() {
         teacherAuthModal.classList.add("hidden");
     });
 
+    teacherAuthModal.addEventListener("click", (e) => {
+        if (e.target === teacherAuthModal) {
+            teacherAuthModal.classList.add("hidden");
+        }
+    });
+
     const validarClave = () => {
         const pin = teacherPinInput.value.trim();
         if (pin !== CLAVE_DOCENTE) {
@@ -1108,6 +1191,23 @@ function configurarConsolaDocente() {
         if (e.key === "Enter") validarClave();
     });
 
+    clearAllExamsBtn.addEventListener("click", async () => {
+        const confirmar = confirm("¿Seguro que querés borrar todos los registros de exámenes de este período?");
+        if (!confirmar) return;
+
+        pendingAdjustById = {};
+        expandedStudentId = null;
+        teacherSubmissionsCache = [];
+        localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify([]));
+
+        try {
+            await remove(ref(db, "examSubmissions"));
+        } catch (err) {
+            // Si no hay red, se limpia el caché local
+        }
+        renderizarListaDocente();
+    });
+
     teacherConsoleList.addEventListener("click", async (e) => {
         const summaryBtn = e.target.closest("[data-toggle-student]");
         if (summaryBtn) {
@@ -1117,11 +1217,27 @@ function configurarConsolaDocente() {
             return;
         }
 
-        const adjBtn = e.target.closest("[data-adjust-id]");
-        if (adjBtn) {
-            const id = adjBtn.getAttribute("data-adjust-id");
-            const delta = Number(adjBtn.getAttribute("data-delta"));
-            await ajustarNotaEnNube(id, delta);
+        const stageBtn = e.target.closest("[data-stage-id]");
+        if (stageBtn) {
+            const id = stageBtn.getAttribute("data-stage-id");
+            const delta = Number(stageBtn.getAttribute("data-delta"));
+            const currentPending = pendingAdjustById[id] || 0;
+            pendingAdjustById[id] = Number((currentPending + delta).toFixed(2));
+            renderizarListaDocente();
+            return;
+        }
+
+        const confirmBtn = e.target.closest("[data-confirm-id]");
+        if (confirmBtn) {
+            const id = confirmBtn.getAttribute("data-confirm-id");
+            await confirmarAjusteYSincronizar(id);
+            return;
+        }
+
+        const deleteBtn = e.target.closest("[data-delete-id]");
+        if (deleteBtn) {
+            const id = deleteBtn.getAttribute("data-delete-id");
+            await borrarExamenIndividual(id);
         }
     });
 }
@@ -1155,15 +1271,35 @@ function abrirConsolaDocente() {
     });
 }
 
-async function ajustarNotaEnNube(recordId, delta) {
+async function borrarExamenIndividual(recordId) {
+    delete pendingAdjustById[recordId];
+    if (expandedStudentId === recordId) {
+        expandedStudentId = null;
+    }
+    teacherSubmissionsCache = teacherSubmissionsCache.filter((r) => r.id !== recordId);
+
+    const locales = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]").filter((r) => r.id !== recordId);
+    localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify(locales));
+
+    try {
+        await remove(ref(db, `examSubmissions/${recordId}`));
+    } catch (err) {
+        // Mantiene borrado local si no hay red
+    }
+    renderizarListaDocente();
+}
+
+async function confirmarAjusteYSincronizar(recordId) {
     const reg = teacherSubmissionsCache.find((r) => r.id === recordId);
     if (!reg) return;
 
-    const nuevoAjuste = Number(((reg.ajusteDocente || 0) + delta).toFixed(2));
+    const stagedDelta = pendingAdjustById[recordId] || 0;
+    const nuevoAjuste = Number(((reg.ajusteDocente || 0) + stagedDelta).toFixed(2));
     const nuevoFinal = Math.max(0, Math.min(10, Number(((reg.puntajeBase || 0) + nuevoAjuste).toFixed(2))));
 
     reg.ajusteDocente = nuevoAjuste;
     reg.puntajeFinal = nuevoFinal;
+    delete pendingAdjustById[recordId];
 
     const locales = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]").map((item) =>
         item.id === recordId ? { ...item, ajusteDocente: nuevoAjuste, puntajeFinal: nuevoFinal } : item
@@ -1179,6 +1315,21 @@ async function ajustarNotaEnNube(recordId, delta) {
         // Mantiene actualización local si no hay red
     }
 
+    const { fecha, hora } = obtenerFechaYHora24h();
+    try {
+        await enviarAPlanillaGoogle({
+            accion: "ajuste_docente",
+            id: recordId,
+            estudiante: reg.estudiante,
+            modalidad: "Modo Examen",
+            puntaje: formatearPuntaje(nuevoFinal),
+            fecha,
+            hora
+        });
+    } catch (err) {
+        // Sin conexión en el momento
+    }
+
     renderizarListaDocente();
 }
 
@@ -1191,8 +1342,15 @@ function renderizarListaDocente() {
     teacherConsoleList.innerHTML = teacherSubmissionsCache
         .map((reg) => {
             const isExpanded = expandedStudentId === reg.id;
+            const stagedDelta = pendingAdjustById[reg.id] || 0;
+            const previewFinal = Math.max(0, Math.min(10, Number(((reg.puntajeFinal ?? reg.puntajeBase ?? 0) + stagedDelta).toFixed(2))));
+
+            const metaHora = reg.hora ? ` · ${reg.hora}` : "";
             const ajusteTexto = reg.ajusteDocente
-                ? ` · Ajuste: ${reg.ajusteDocente > 0 ? "+" : ""}${formatearPuntaje(reg.ajusteDocente)}`
+                ? ` · Ajuste aplicado: ${reg.ajusteDocente > 0 ? "+" : ""}${formatearPuntaje(reg.ajusteDocente)}`
+                : "";
+            const pendienteTexto = stagedDelta
+                ? ` (Pendiente: ${stagedDelta > 0 ? "+" : ""}${formatearPuntaje(stagedDelta)})`
                 : "";
 
             const stepsHtml = (reg.pasos || [])
@@ -1213,17 +1371,19 @@ function renderizarListaDocente() {
                     <button type="button" class="teacher-card-summary" data-toggle-student="${reg.id}">
                         <div>
                             <strong>${reg.estudiante}</strong>
-                            <div class="perception-subtle">${reg.fecha || ""}${ajusteTexto}</div>
+                            <div class="perception-subtle">${reg.fecha || ""}${metaHora}${ajusteTexto}</div>
                         </div>
-                        <span class="teacher-score-badge">${formatearPuntaje(reg.puntajeFinal)} / 10.0 ${isExpanded ? "▲" : "▼"}</span>
+                        <span class="teacher-score-badge">${formatearPuntaje(previewFinal)} / 10.0 ${isExpanded ? "▲" : "▼"}</span>
                     </button>
 
                     <div class="teacher-card-details ${isExpanded ? "" : "hidden"}">
                         <div class="teacher-adjust-row">
-                            <span class="perception-subtle">Ajustar calificación decimal:</span>
-                            <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.2">+0.2</button>
-                            <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.5">+0.5</button>
-                            <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="-0.2">-0.2</button>
+                            <span class="perception-subtle">Ajuste decimal${pendienteTexto}:</span>
+                            <button type="button" class="teacher-mini-btn" data-stage-id="${reg.id}" data-delta="0.2">+0.2</button>
+                            <button type="button" class="teacher-mini-btn" data-stage-id="${reg.id}" data-delta="0.5">+0.5</button>
+                            <button type="button" class="teacher-mini-btn" data-stage-id="${reg.id}" data-delta="-0.2">-0.2</button>
+                            <button type="button" class="teacher-confirm-btn" data-confirm-id="${reg.id}">Aceptar</button>
+                            <button type="button" class="teacher-danger-btn" data-delete-id="${reg.id}">Borrar Examen</button>
                         </div>
                         <div class="teacher-step-list">${stepsHtml}</div>
                     </div>
@@ -1725,7 +1885,27 @@ function configurarEventosGlobales() {
     if (openAboutBtn) openAboutBtn.addEventListener("click", () => aboutModal.classList.remove("hidden"));
     if (closeAboutBtn) closeAboutBtn.addEventListener("click", () => aboutModal.classList.add("hidden"));
 
+    if (wheelModal) {
+        wheelModal.addEventListener("click", (e) => {
+            if (e.target === wheelModal) wheelModal.classList.add("hidden");
+        });
+    }
+    if (aboutModal) {
+        aboutModal.addEventListener("click", (e) => {
+            if (e.target === aboutModal) aboutModal.classList.add("hidden");
+        });
+    }
+
     document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            if (!nameModal.classList.contains("hidden")) {
+                nameModal.classList.add("hidden");
+                pendingMode = null;
+            }
+            if (!aboutModal.classList.contains("hidden")) aboutModal.classList.add("hidden");
+            if (!wheelModal.classList.contains("hidden")) wheelModal.classList.add("hidden");
+            if (!teacherAuthModal.classList.contains("hidden")) teacherAuthModal.classList.add("hidden");
+        }
         if ((e.key === "Enter" || e.key === " ") && !feedbackModal.classList.contains("hidden")) {
             e.preventDefault();
             nextBtn.click();

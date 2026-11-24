@@ -895,6 +895,12 @@ body {
     flex-wrap: wrap;
 }
 
+.teacher-console-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .teacher-records-list {
     display: flex;
     flex-direction: column;
@@ -970,6 +976,32 @@ body {
 .teacher-mini-btn:hover {
     border-color: var(--border-active);
     background: var(--bg-hover);
+}
+
+.teacher-confirm-btn {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    border: none;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.teacher-danger-btn {
+    background: transparent;
+    color: #ff9eb5;
+    border: 1px solid rgba(255, 158, 181, 0.45);
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.teacher-danger-btn:hover {
+    background: rgba(255, 158, 181, 0.12);
 }
 
 .teacher-step-list {

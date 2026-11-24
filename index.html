@@ -10,7 +10,7 @@
 <body>
     <!-- Barra de Navegación Superior -->
     <header class="app-header">
-        <div class="header-brand" id="brand-logo" title="Volver al Inicio">
+        <div class="header-brand" id="brand-logo" title="Ir a la portada principal">
             <span class="brand-title">CATA SENSORIAL</span>
         </div>
 
@@ -382,7 +382,7 @@
                 <div id="live-leaderboard-list" class="leaderboard-list"></div>
 
                 <div class="hero-cta-group" style="margin-top: 30px;">
-                    <button id="live-back-home-btn" type="button" class="primary-pill-btn">Volver al Inicio</button>
+                    <button id="live-back-modes-btn" type="button" class="primary-pill-btn">Ver Modos de Cata</button>
                 </div>
             </div>
         </section>
@@ -395,10 +395,13 @@
                         <span class="pill-tag">CONSOLA DOCENTE</span>
                         <h2 class="section-title-large" style="margin-top: 10px;">Exámenes y Recorridos de Alumnos</h2>
                         <p class="hero-subtitle" style="text-align: left; margin-top: 6px;">
-                            Selecciona la tarjeta de un estudiante para desplegar su recorrido completo, revisar en qué tramo falló y ajustar su calificación decimal.
+                            Selecciona la tarjeta de un estudiante para ver su recorrido, ajustar décimas y confirmar con Aceptar para sincronizar la planilla.
                         </p>
                     </div>
-                    <button id="teacher-back-home-btn" type="button" class="secondary-pill-btn">Salir de Consola</button>
+                    <div class="teacher-console-actions">
+                        <button id="clear-all-exams-btn" type="button" class="secondary-pill-btn">Borrar Período Completo</button>
+                        <button id="teacher-back-modes-btn" type="button" class="secondary-pill-btn">Ir a Modos</button>
+                    </div>
                 </div>
 
                 <div id="teacher-console-list" class="teacher-records-list"></div>
@@ -431,12 +434,12 @@
             <div id="performance-breakdown" class="breakdown-panel hidden"></div>
 
             <div class="hero-cta-group" style="margin-top: 36px;">
-                <button id="restart-menu-btn" type="button" class="primary-pill-btn">Volver al Inicio</button>
+                <button id="restart-menu-btn" type="button" class="primary-pill-btn">Elegir Otro Modo</button>
             </div>
         </section>
     </main>
 
-    <!-- Modal: Ingreso de Nombre y Apellido -->
+    <!-- Modal: Ingreso de Nombre y Apellido (cierra tocando fuera o atrás) -->
     <div id="name-modal" class="modal-overlay hidden">
         <div class="modal-content feedback-box text-center">
             <h3>Identificación</h3>
