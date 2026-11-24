@@ -117,7 +117,7 @@
                         </svg>
                     </div>
                     <h3>Modo Examen</h3>
-                    <p>Evaluación de 10 muestras (1.0 pt cada una, escala hasta 10.0) con registro de decimales y recorrido completo para la profesora.</p>
+                    <p>Evaluación de 10 muestras (1.0 pt cada una, escala hasta 10.0) con registro de decimales y envío automático para revisión docente.</p>
                     <span class="mode-action-link">Iniciar evaluación ➔</span>
                 </div>
 
@@ -387,7 +387,25 @@
             </div>
         </section>
 
-        <!-- Pantalla Final (Modos Individuales + Auditoría Docente) -->
+        <!-- Consola Exclusiva de la Profesora (Acceso desde dispositivo docente) -->
+        <section id="teacher-console-screen" class="fullscreen-section hidden">
+            <div class="teacher-console-wrapper">
+                <div class="teacher-console-top">
+                    <div>
+                        <span class="pill-tag">CONSOLA DOCENTE</span>
+                        <h2 class="section-title-large" style="margin-top: 10px;">Exámenes y Recorridos de Alumnos</h2>
+                        <p class="hero-subtitle" style="text-align: left; margin-top: 6px;">
+                            Selecciona la tarjeta de un estudiante para desplegar su recorrido completo, revisar en qué tramo falló y ajustar su calificación decimal.
+                        </p>
+                    </div>
+                    <button id="teacher-back-home-btn" type="button" class="secondary-pill-btn">Salir de Consola</button>
+                </div>
+
+                <div id="teacher-console-list" class="teacher-records-list"></div>
+            </div>
+        </section>
+
+        <!-- Pantalla Final (Modos Individuales del Estudiante) -->
         <section id="end-screen" class="fullscreen-section hidden">
             <span class="pill-tag">SESIÓN FINALIZADA</span>
             <h2 id="end-screen-title" class="section-title-large" style="margin-top: 12px;">Resultado Registrado</h2>
@@ -412,17 +430,7 @@
 
             <div id="performance-breakdown" class="breakdown-panel hidden"></div>
 
-            <!-- Panel exclusivo para la Profesora (recorrido, decimales y ponderación) -->
-            <div id="teacher-audit-panel" class="teacher-panel hidden">
-                <div class="teacher-panel-header">
-                    <h4>Revisión Exclusiva de la Profesora · Recorrido y Puntaje Decimal</h4>
-                    <span class="perception-subtle">Calificación en escala decimal (máx. 10.0)</span>
-                </div>
-                <div id="teacher-records-list" class="teacher-records-list"></div>
-            </div>
-
-            <div class="hero-cta-group" style="margin-top: 32px;">
-                <button id="open-teacher-audit-btn" type="button" class="secondary-pill-btn">Revisión de la Profesora</button>
+            <div class="hero-cta-group" style="margin-top: 36px;">
                 <button id="restart-menu-btn" type="button" class="primary-pill-btn">Volver al Inicio</button>
             </div>
         </section>
@@ -435,6 +443,18 @@
             <p id="student-modal-prompt" style="text-align: center; margin-bottom: 16px;">Ingresa tu Nombre y Apellido para registrar tu práctica.</p>
             <input type="text" id="student-name-input" class="student-input-field" placeholder="Nombre y Apellido" autocomplete="off">
             <button id="start-session-btn" type="button" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 16px;">Comenzar Práctica ➔</button>
+        </div>
+    </div>
+
+    <!-- Modal: Acceso Docente -->
+    <div id="teacher-auth-modal" class="modal-overlay hidden">
+        <div class="modal-content feedback-box text-center">
+            <button id="close-teacher-auth-btn" type="button" class="close-btn">&times;</button>
+            <h3>Acceso Docente</h3>
+            <p style="text-align: center; margin-bottom: 14px;">Ingresa la clave docente para ver los exámenes recibidos y sus recorridos.</p>
+            <input type="password" id="teacher-pin-input" class="student-input-field" placeholder="Clave docente" autocomplete="off">
+            <p id="teacher-auth-error" class="live-error-text hidden" style="text-align: center;"></p>
+            <button id="submit-teacher-pin-btn" type="button" class="primary-pill-btn" style="width: 100%; justify-content: center; margin-top: 12px;">Ingresar a Consola ➔</button>
         </div>
     </div>
 

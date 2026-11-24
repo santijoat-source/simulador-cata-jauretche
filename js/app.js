@@ -119,12 +119,20 @@ let liveFamily = null;
 let liveSubfamily = null;
 let liveDescriptor = null;
 
+// Estado Consola Docente
+let submissionsRef = null;
+let teacherSubmissionsCache = [];
+let expandedStudentId = null;
+let logoTapCount = 0;
+let logoTapTimer = null;
+
 // Pantallas
 const heroScreen = document.getElementById("hero-screen");
 const modesScreen = document.getElementById("modes-screen");
 const gameContainer = document.getElementById("game-container");
 const visualContainer = document.getElementById("visual-container");
 const liveContainer = document.getElementById("live-container");
+const teacherConsoleScreen = document.getElementById("teacher-console-screen");
 const endScreen = document.getElementById("end-screen");
 
 // Navegación y Progreso
@@ -143,6 +151,15 @@ const startSessionBtn = document.getElementById("start-session-btn");
 
 const studentTagAroma = document.getElementById("student-tag-aroma");
 const studentTagVis = document.getElementById("student-tag-vis");
+
+// Acceso y Consola Docente
+const teacherAuthModal = document.getElementById("teacher-auth-modal");
+const closeTeacherAuthBtn = document.getElementById("close-teacher-auth-btn");
+const teacherPinInput = document.getElementById("teacher-pin-input");
+const teacherAuthError = document.getElementById("teacher-auth-error");
+const submitTeacherPinBtn = document.getElementById("submit-teacher-pin-btn");
+const teacherConsoleList = document.getElementById("teacher-console-list");
+const teacherBackHomeBtn = document.getElementById("teacher-back-home-btn");
 
 // Otros modales y controles
 const openAboutBtn = document.getElementById("open-about-btn");
@@ -218,6 +235,7 @@ const playerRoomBadge = document.getElementById("player-room-badge");
 const liveTimerDisplay = document.getElementById("live-timer-display");
 const liveMyScore = document.getElementById("live-my-score");
 const liveWaitingCard = document.getElementById("live-waiting-card");
+const liveWaitingMessage = document.getElementById("live-waiting-message");
 const liveQuestionCard = document.getElementById("live-question-card");
 const liveSampleBadge = document.getElementById("live-sample-badge");
 const liveSampleTitle = document.getElementById("live-sample-title");
@@ -254,10 +272,6 @@ const finalAccuracyEl = document.getElementById("final-accuracy");
 const finalRankEl = document.getElementById("final-rank");
 const performanceBreakdownEl = document.getElementById("performance-breakdown");
 
-const openTeacherAuditBtn = document.getElementById("open-teacher-audit-btn");
-const teacherAuditPanel = document.getElementById("teacher-audit-panel");
-const teacherRecordsList = document.getElementById("teacher-records-list");
-
 const openWheelBtn = document.getElementById("open-wheel-btn");
 const closeWheelBtn = document.getElementById("close-wheel-btn");
 const wheelModal = document.getElementById("wheel-modal");
@@ -267,7 +281,8 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarNavegacion();
     configurarEventosGlobales();
     configurarSalaEnVivo();
-    configurarAuditoriaDocente();
+    configurarConsolaDocente();
+    verificarAccesoDocentePorUrl();
 });
 
 function configurarTemaSVG() {
@@ -300,6 +315,7 @@ function ocultarTodasLasPantallas() {
     gameContainer.classList.add("hidden");
     visualContainer.classList.add("hidden");
     liveContainer.classList.add("hidden");
+    teacherConsoleScreen.classList.add("hidden");
     endScreen.classList.add("hidden");
     feedbackModal.classList.add("hidden");
     nameModal.classList.add("hidden");
@@ -385,9 +401,39 @@ function configurarNavegacion() {
         openWheelBtn.classList.remove("hidden");
     };
 
-    brandLogo.addEventListener("click", irAlInicio);
+    // 5 toques rápidos en el logo permiten abrir el acceso docente sin exponer botones a los alumnos
+    brandLogo.addEventListener("click", () => {
+        logoTapCount += 1;
+        if (logoTapTimer) clearTimeout(logoTapTimer);
+        if (logoTapCount >= 5) {
+            logoTapCount = 0;
+            abrirModalClaveDocente();
+            return;
+        }
+        logoTapTimer = setTimeout(() => {
+            logoTapCount = 0;
+            irAlInicio();
+        }, 650);
+    });
+
     restartMenuBtn.addEventListener("click", irAlInicio);
     liveBackHomeBtn.addEventListener("click", irAlInicio);
+    teacherBackHomeBtn.addEventListener("click", irAlInicio);
+}
+
+function verificarAccesoDocentePorUrl() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("docente") === "1") {
+        abrirModalClaveDocente();
+    }
+}
+
+function abrirModalClaveDocente() {
+    teacherAuthError.classList.add("hidden");
+    teacherAuthError.textContent = "";
+    teacherPinInput.value = "";
+    teacherAuthModal.classList.remove("hidden");
+    teacherPinInput.focus();
 }
 
 function obtenerFuenteMuestrasEntrenamiento() {
@@ -432,25 +478,34 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
     localStorage.setItem(STORAGE_KEY, JSON.stringify(resultadosLocales));
 
     if (Array.isArray(pasosExamen)) {
-        const registrosExamen = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
-        registrosExamen.unshift({
-            id: `ex_${Date.now()}`,
+        const submissionId = `ex_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const submissionData = {
+            id: submissionId,
             estudiante: currentStudentName,
             puntajeBase: Number(puntajeFinal),
             ajusteDocente: 0,
             puntajeFinal: Number(puntajeFinal),
             fecha: new Date().toLocaleString(),
             pasos: pasosExamen
-        });
-        localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify(registrosExamen));
+        };
+
+        const registrosLocalesExamen = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
+        registrosLocalesExamen.unshift(submissionData);
+        localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify(registrosLocalesExamen));
+
+        try {
+            await set(ref(db, `examSubmissions/${submissionId}`), submissionData);
+        } catch (err) {
+            // Si falla la red, queda guardado localmente en el dispositivo
+        }
     }
 
     if (!CLOUD_RESULTS_URL) {
-        syncStatusText.textContent = "Resultado guardado localmente en este dispositivo.";
+        syncStatusText.textContent = "Resultado registrado.";
         return;
     }
 
-    syncStatusText.textContent = "Registrando resultado en la planilla...";
+    syncStatusText.textContent = "Registrando resultado...";
     try {
         await fetch(CLOUD_RESULTS_URL, {
             method: "POST",
@@ -460,7 +515,7 @@ async function guardarResultadoEstudiante(modalidadNombre, puntajeFinal, rangoFi
         });
         syncStatusText.textContent = "✓ Resultado enviado y registrado correctamente.";
     } catch (error) {
-        syncStatusText.textContent = "Guardado localmente (sin conexión para sincronizar ahora).";
+        syncStatusText.textContent = "Guardado en el dispositivo (sin conexión para sincronizar ahora).";
     }
 }
 
@@ -751,8 +806,6 @@ verifyBtn.addEventListener("click", () => {
     const tramoError = esExito ? "Ruta completa correcta" : determinarTramoError(caso);
 
     if (currentMode === "examen") {
-        // Escala de 10 muestras x 1.0 pt = 10.0 pts máximos.
-        // Si acierta Macro y Familia y falla solo en el Descriptor específico, recibe 0.8 pts parciales.
         let puntosMuestra = 0;
         if (esExito) {
             puntosMuestra = 1.0;
@@ -987,7 +1040,6 @@ function mostrarPantallaFinal() {
     ocultarTodasLasPantallas();
     statsContainer.classList.add("hidden");
     openWheelBtn.classList.remove("hidden");
-    teacherAuditPanel.classList.add("hidden");
 
     const totalMuestras = sessionCases.length || 1;
 
@@ -1033,63 +1085,121 @@ function mostrarPantallaFinal() {
 }
 
 // ==========================================
-// AUDITORÍA DOCENTE (RECORRIDO Y DECIMALES)
+// CONSOLA DOCENTE CENTRALIZADA (FIREBASE RTDB)
 // ==========================================
-function configurarAuditoriaDocente() {
-    openTeacherAuditBtn.addEventListener("click", () => {
-        if (!teacherAuditPanel.classList.contains("hidden")) {
-            teacherAuditPanel.classList.add("hidden");
-            return;
-        }
-        const claveIngresada = prompt("Ingresá la clave de la profesora para ver los recorridos y ajustes decimales:");
-        if (claveIngresada !== CLAVE_DOCENTE) {
-            alert("Clave incorrecta.");
-            return;
-        }
-        renderizarPanelDocente();
-        teacherAuditPanel.classList.remove("hidden");
+function configurarConsolaDocente() {
+    closeTeacherAuthBtn.addEventListener("click", () => {
+        teacherAuthModal.classList.add("hidden");
     });
 
-    teacherRecordsList.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-adjust-id]");
-        if (!btn) return;
-        const id = btn.getAttribute("data-adjust-id");
-        const delta = Number(btn.getAttribute("data-delta"));
-        ajustarPuntajeExamen(id, delta);
+    const validarClave = () => {
+        const pin = teacherPinInput.value.trim();
+        if (pin !== CLAVE_DOCENTE) {
+            teacherAuthError.textContent = "Clave incorrecta.";
+            teacherAuthError.classList.remove("hidden");
+            return;
+        }
+        teacherAuthModal.classList.add("hidden");
+        abrirConsolaDocente();
+    };
+
+    submitTeacherPinBtn.addEventListener("click", validarClave);
+    teacherPinInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") validarClave();
+    });
+
+    teacherConsoleList.addEventListener("click", async (e) => {
+        const summaryBtn = e.target.closest("[data-toggle-student]");
+        if (summaryBtn) {
+            const id = summaryBtn.getAttribute("data-toggle-student");
+            expandedStudentId = expandedStudentId === id ? null : id;
+            renderizarListaDocente();
+            return;
+        }
+
+        const adjBtn = e.target.closest("[data-adjust-id]");
+        if (adjBtn) {
+            const id = adjBtn.getAttribute("data-adjust-id");
+            const delta = Number(adjBtn.getAttribute("data-delta"));
+            await ajustarNotaEnNube(id, delta);
+        }
     });
 }
 
-function ajustarPuntajeExamen(recordId, delta) {
-    const registros = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
-    const idx = registros.findIndex((r) => r.id === recordId);
-    if (idx === -1) return;
+function abrirConsolaDocente() {
+    limpiarSuscripcionSala();
+    ocultarTodasLasPantallas();
+    statsContainer.classList.add("hidden");
+    progressWrapper.classList.add("hidden");
+    teacherConsoleScreen.classList.remove("hidden");
 
-    const reg = registros[idx];
+    if (submissionsRef) {
+        off(submissionsRef);
+    }
+
+    submissionsRef = ref(db, "examSubmissions");
+    onValue(submissionsRef, (snapshot) => {
+        const raw = snapshot.val() || {};
+        const nubeLista = Object.values(raw).sort((a, b) => (b.id || "").localeCompare(a.id || ""));
+        const locales = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
+
+        const mapa = new Map();
+        [...nubeLista, ...locales].forEach((item) => {
+            if (item && item.id && !mapa.has(item.id)) {
+                mapa.set(item.id, item);
+            }
+        });
+
+        teacherSubmissionsCache = Array.from(mapa.values());
+        renderizarListaDocente();
+    });
+}
+
+async function ajustarNotaEnNube(recordId, delta) {
+    const reg = teacherSubmissionsCache.find((r) => r.id === recordId);
+    if (!reg) return;
+
     const nuevoAjuste = Number(((reg.ajusteDocente || 0) + delta).toFixed(2));
     const nuevoFinal = Math.max(0, Math.min(10, Number(((reg.puntajeBase || 0) + nuevoAjuste).toFixed(2))));
 
     reg.ajusteDocente = nuevoAjuste;
     reg.puntajeFinal = nuevoFinal;
-    registros[idx] = reg;
 
-    localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify(registros));
-    renderizarPanelDocente();
+    const locales = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]").map((item) =>
+        item.id === recordId ? { ...item, ajusteDocente: nuevoAjuste, puntajeFinal: nuevoFinal } : item
+    );
+    localStorage.setItem(EXAM_RECORDS_KEY, JSON.stringify(locales));
+
+    try {
+        await update(ref(db, `examSubmissions/${recordId}`), {
+            ajusteDocente: nuevoAjuste,
+            puntajeFinal: nuevoFinal
+        });
+    } catch (err) {
+        // Mantiene actualización local si no hay red
+    }
+
+    renderizarListaDocente();
 }
 
-function renderizarPanelDocente() {
-    const registros = JSON.parse(localStorage.getItem(EXAM_RECORDS_KEY) || "[]");
-    if (registros.length === 0) {
-        teacherRecordsList.innerHTML = `<p class="perception-subtle">Todavía no hay evaluaciones de examen registradas en este dispositivo.</p>`;
+function renderizarListaDocente() {
+    if (!teacherSubmissionsCache.length) {
+        teacherConsoleList.innerHTML = `<p class="perception-subtle">Aún no se registraron exámenes de estudiantes.</p>`;
         return;
     }
 
-    teacherRecordsList.innerHTML = registros
+    teacherConsoleList.innerHTML = teacherSubmissionsCache
         .map((reg) => {
+            const isExpanded = expandedStudentId === reg.id;
+            const ajusteTexto = reg.ajusteDocente
+                ? ` · Ajuste: ${reg.ajusteDocente > 0 ? "+" : ""}${formatearPuntaje(reg.ajusteDocente)}`
+                : "";
+
             const stepsHtml = (reg.pasos || [])
-                .map((s, i) => {
+                .map((s, idx) => {
                     return `
                         <div class="teacher-step-item">
-                            <strong>Muestra ${i + 1}: ${s.muestra}</strong> · <span>${formatearPuntaje(s.puntos)} / 1.0 pt</span><br>
+                            <strong>Muestra ${idx + 1}: ${s.muestra}</strong> · <span>${formatearPuntaje(s.puntos)} / 1.0 pt</span><br>
                             <span>Elegido: ${s.elegida}</span><br>
                             <span>Esperado: ${s.esperada}</span><br>
                             <span>Tramo / Diagnóstico: ${s.tramoError}</span>
@@ -1098,26 +1208,25 @@ function renderizarPanelDocente() {
                 })
                 .join("");
 
-            const ajusteTexto = reg.ajusteDocente
-                ? ` · Ajuste docente: ${reg.ajusteDocente > 0 ? "+" : ""}${formatearPuntaje(reg.ajusteDocente)}`
-                : "";
-
             return `
-                <div class="teacher-student-card">
-                    <div class="teacher-student-top">
+                <div class="teacher-student-card ${isExpanded ? "expanded" : ""}">
+                    <button type="button" class="teacher-card-summary" data-toggle-student="${reg.id}">
                         <div>
                             <strong>${reg.estudiante}</strong>
-                            <div class="perception-subtle">${reg.fecha}${ajusteTexto}</div>
+                            <div class="perception-subtle">${reg.fecha || ""}${ajusteTexto}</div>
                         </div>
-                        <span class="teacher-score-badge">Nota Final: ${formatearPuntaje(reg.puntajeFinal)} / 10.0</span>
+                        <span class="teacher-score-badge">${formatearPuntaje(reg.puntajeFinal)} / 10.0 ${isExpanded ? "▲" : "▼"}</span>
+                    </button>
+
+                    <div class="teacher-card-details ${isExpanded ? "" : "hidden"}">
+                        <div class="teacher-adjust-row">
+                            <span class="perception-subtle">Ajustar calificación decimal:</span>
+                            <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.2">+0.2</button>
+                            <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.5">+0.5</button>
+                            <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="-0.2">-0.2</button>
+                        </div>
+                        <div class="teacher-step-list">${stepsHtml}</div>
                     </div>
-                    <div class="teacher-adjust-row">
-                        <span class="perception-subtle">Ponderar / Ajustar nota:</span>
-                        <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.2">+0.2</button>
-                        <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="0.5">+0.5</button>
-                        <button type="button" class="teacher-mini-btn" data-adjust-id="${reg.id}" data-delta="-0.2">-0.2</button>
-                    </div>
-                    <div class="teacher-step-list">${stepsHtml}</div>
                 </div>
             `;
         })
